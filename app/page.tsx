@@ -6,11 +6,11 @@ import { DeliveryPartnerSection } from "@/components/landing/delivery-partner-se
 import { AppFooter } from "@/components/landing/app-footer"
 import { MainNav } from "@/components/landing/main-nav"
 
-export default function LandingPage() {
+export default function HomePage() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="min-h-screen bg-white">
       <MainNav />
-      <main className="flex-1">
+      <main>
         <HeroSection />
         <HowItWorksSection />
         <FeaturedProductsSection />
