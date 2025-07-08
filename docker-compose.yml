@@ -1,90 +1,173 @@
-version: '3'
+version: '3.8'
 
 services:
   main:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3000:3000"
     environment:
       - PORT=3000
+      - NODE_ENV=development
     volumes:
       - .:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    restart: unless-stopped
 
   ecom:
     build:
       context: ./Services/E-com
       dockerfile: ../../Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3001:3001"
     environment:
       - PORT=3001
+      - NODE_ENV=development
     volumes:
       - ./Services/E-com:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    restart: unless-stopped
 
   elearning:
     build:
       context: ./Services/E-Learning
       dockerfile: ../../Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3002:3002"
     environment:
       - PORT=3002
+      - NODE_ENV=development
     volumes:
       - ./Services/E-Learning:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    restart: unless-stopped
 
   fooddelivery:
     build:
       context: ./Services/Food-Delivery
       dockerfile: ../../Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3003:3003"
     environment:
       - PORT=3003
+      - NODE_ENV=development
     volumes:
       - ./Services/Food-Delivery:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    restart: unless-stopped
 
   healthcare:
     build:
       context: ./Services/Healthcare
       dockerfile: ../../Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3004:3004"
     environment:
       - PORT=3004
+      - NODE_ENV=development
     volumes:
       - ./Services/Healthcare:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    restart: unless-stopped
 
   travel_and_tourism:
     build:
       context: ./Services/Travel_&_Tourism
       dockerfile: ../../Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3005:3005"
     environment:
       - PORT=3005
+      - NODE_ENV=development
     volumes:
       - ./Services/Travel_&_Tourism:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    restart: unless-stopped
 
   wholesale:
     build:
       context: ./Services/Wholesale
       dockerfile: ../../Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3006:3006"
     environment:
       - PORT=3006
+      - NODE_ENV=development
     volumes:
       - ./Services/Wholesale:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    restart: unless-stopped
 
   travelandtourism:
     build:
       context: ./Services/Travel&Tourism
       dockerfile: ../../Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3007:3007"
     environment:
       - PORT=3007
+      - NODE_ENV=development
     volumes:
       - ./Services/Travel&Tourism:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Nginx reverse proxy for load balancing
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - main
+      - ecom
+      - elearning
+      - fooddelivery
+      - healthcare
+      - travel_and_tourism
+      - wholesale
+      - travelandtourism
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  node_modules:
