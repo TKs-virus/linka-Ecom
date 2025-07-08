@@ -261,3 +261,7 @@ export function FilterSidebar({ onFilterChange }: FilterSidebarProps) {
     </Card>
   )
 }
+
+// --- build-alias ---
+export const FilterSidebarComponent = FilterSidebar
+export default FilterSidebarComponent

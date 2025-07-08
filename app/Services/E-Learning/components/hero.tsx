@@ -56,3 +56,7 @@ export function Hero() {
     </section>
   )
 }
+
+// --- build-alias ---
+export const HeroComponent = Hero
+export default HeroComponent

@@ -78,3 +78,7 @@ export function CourseCard({
     </Card>
   )
 }
+
+// --- build-alias ---
+export const CourseCardComponent = CourseCard
+export default CourseCardComponent

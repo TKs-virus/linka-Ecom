@@ -74,3 +74,7 @@ export function TrendingCourses() {
     </section>
   )
 }
+
+// --- build-alias ---
+export const TrendingCoursesComponent = TrendingCourses
+export default TrendingCoursesComponent

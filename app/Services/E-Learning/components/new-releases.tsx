@@ -74,3 +74,7 @@ export function NewReleases() {
     </section>
   )
 }
+
+// --- build-alias ---
+export const NewReleasesComponent = NewReleases
+export default NewReleasesComponent

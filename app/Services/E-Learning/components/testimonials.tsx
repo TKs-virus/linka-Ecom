@@ -67,3 +67,7 @@ export function Testimonials() {
     </section>
   )
 }
+
+// --- build-alias ---
+export const TestimonialsComponent = Testimonials
+export default TestimonialsComponent

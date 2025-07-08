@@ -23,3 +23,7 @@ export function SearchSection() {
     </section>
   )
 }
+
+// --- build-alias ---
+export const SearchSectionComponent = SearchSection
+export default SearchSectionComponent
