@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3000:3000"
     environment:
@@ -15,16 +13,20 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - /app/.next
     networks:
-      - app-network
+      - linka-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   ecom:
     build:
       context: ./Services/E-com
       dockerfile: ../../Dockerfile
-      args:
-        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3001:3001"
     environment:
@@ -33,16 +35,15 @@ services:
     volumes:
       - ./Services/E-com:/app
       - /app/node_modules
+      - /app/.next
     networks:
-      - app-network
+      - linka-network
     restart: unless-stopped
 
   elearning:
     build:
       context: ./Services/E-Learning
       dockerfile: ../../Dockerfile
-      args:
-        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3002:3002"
     environment:
@@ -51,16 +52,15 @@ services:
     volumes:
       - ./Services/E-Learning:/app
       - /app/node_modules
+      - /app/.next
     networks:
-      - app-network
+      - linka-network
     restart: unless-stopped
 
   fooddelivery:
     build:
       context: ./Services/Food-Delivery
       dockerfile: ../../Dockerfile
-      args:
-        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3003:3003"
     environment:
@@ -69,16 +69,15 @@ services:
     volumes:
       - ./Services/Food-Delivery:/app
       - /app/node_modules
+      - /app/.next
     networks:
-      - app-network
+      - linka-network
     restart: unless-stopped
 
   healthcare:
     build:
       context: ./Services/Healthcare
       dockerfile: ../../Dockerfile
-      args:
-        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3004:3004"
     environment:
@@ -87,16 +86,15 @@ services:
     volumes:
       - ./Services/Healthcare:/app
       - /app/node_modules
+      - /app/.next
     networks:
-      - app-network
+      - linka-network
     restart: unless-stopped
 
   travel_and_tourism:
     build:
       context: ./Services/Travel_&_Tourism
       dockerfile: ../../Dockerfile
-      args:
-        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3005:3005"
     environment:
@@ -105,16 +103,15 @@ services:
     volumes:
       - ./Services/Travel_&_Tourism:/app
       - /app/node_modules
+      - /app/.next
     networks:
-      - app-network
+      - linka-network
     restart: unless-stopped
 
   wholesale:
     build:
       context: ./Services/Wholesale
       dockerfile: ../../Dockerfile
-      args:
-        - BUILDKIT_INLINE_CACHE=1
     ports:
       - "3006:3006"
     environment:
@@ -123,51 +120,15 @@ services:
     volumes:
       - ./Services/Wholesale:/app
       - /app/node_modules
+      - /app/.next
     networks:
-      - app-network
-    restart: unless-stopped
-
-  travelandtourism:
-    build:
-      context: ./Services/Travel&Tourism
-      dockerfile: ../../Dockerfile
-      args:
-        - BUILDKIT_INLINE_CACHE=1
-    ports:
-      - "3007:3007"
-    environment:
-      - PORT=3007
-      - NODE_ENV=development
-    volumes:
-      - ./Services/Travel&Tourism:/app
-      - /app/node_modules
-    networks:
-      - app-network
-    restart: unless-stopped
-
-  # Nginx reverse proxy for load balancing
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - main
-      - ecom
-      - elearning
-      - fooddelivery
-      - healthcare
-      - travel_and_tourism
-      - wholesale
-      - travelandtourism
-    networks:
-      - app-network
+      - linka-network
     restart: unless-stopped
 
 networks:
-  app-network:
+  linka-network:
     driver: bridge
 
 volumes:
   node_modules:
+  next_cache:

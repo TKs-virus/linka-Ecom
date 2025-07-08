@@ -6,7 +6,7 @@ RUN npm install -g pnpm
 # Set working directory
 WORKDIR /app
 
-# Configure pnpm to use a more reliable registry and increase timeout
+# Configure pnpm for better network handling
 RUN pnpm config set registry https://registry.npmjs.org/
 RUN pnpm config set network-timeout 300000
 RUN pnpm config set fetch-retries 5
@@ -14,23 +14,24 @@ RUN pnpm config set fetch-retry-factor 2
 RUN pnpm config set fetch-retry-mintimeout 10000
 RUN pnpm config set fetch-retry-maxtimeout 60000
 
-# Copy package.json and pnpm-lock.yaml from the build context (service directory)
+# Copy package files
 COPY package.json ./
 COPY pnpm-lock.yaml* ./
 
-# Install dependencies with retry logic and increased timeout
+# Install dependencies with retry logic
 RUN pnpm install --frozen-lockfile --network-timeout=300000 || \
     (sleep 10 && pnpm install --frozen-lockfile --network-timeout=300000) || \
     (sleep 30 && pnpm install --frozen-lockfile --network-timeout=300000)
 
-# Copy the rest of the application code
+# Copy source code
 COPY . .
 
-# Set environment variable for port (default 3000)
+# Set environment variables
 ENV PORT=3000
+ENV NODE_ENV=development
 
-# Expose the port
+# Expose port
 EXPOSE $PORT
 
-# Run the Next.js dev server
-CMD ["pnpm", "dev", "-p", "$PORT"]
+# Start the application
+CMD ["pnpm", "dev", "--port", "$PORT"]
