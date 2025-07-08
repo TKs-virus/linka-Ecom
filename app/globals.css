@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 24 85% 53%; /* Brand orange */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 202 69% 42%; /* Brand blue */
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 24 85% 53%; /* Brand orange */
+    --chart-1: 24 85% 53%; /* Brand orange */
+    --chart-2: 202 69% 42%; /* Brand blue */
+    --chart-3: 24 100% 50%; /* Orange light */
+    --chart-4: 202 85% 60%; /* Blue light */
+    --chart-5: 24 70% 40%; /* Orange dark */
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 202 69% 42%; /* Brand blue */
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 24 85% 95%; /* Light orange tint */
+    --sidebar-accent-foreground: 24 85% 53%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 24 85% 53%; /* Brand orange */
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 24 85% 53%; /* Brand orange */
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 202 69% 42%; /* Brand blue */
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 24 85% 53%; /* Brand orange */
+    --chart-1: 24 85% 53%; /* Brand orange */
+    --chart-2: 202 69% 42%; /* Brand blue */
+    --chart-3: 24 100% 60%; /* Orange light */
+    --chart-4: 202 85% 70%; /* Blue light */
+    --chart-5: 24 70% 35%; /* Orange dark */
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 24 85% 53%; /* Brand orange */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 24 85% 53%; /* Brand orange */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom brand utilities */
+@layer utilities {
+  .gradient-text-linka {
+    @apply bg-gradient-to-r from-brand-orange to-brand-blue bg-clip-text text-transparent;
+  }
+
+  .gradient-bg-linka {
+    @apply bg-gradient-to-r from-brand-orange to-brand-blue;
+  }
+
+  .gradient-bg-linka-light {
+    @apply bg-gradient-to-r from-brand-orange-light to-brand-blue-light;
+  }
+
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-1;
+  }
+
+  .brand-shadow {
+    box-shadow: 0 4px 14px 0 rgba(230, 126, 34, 0.15);
+  }
+
+  .brand-shadow-blue {
+    box-shadow: 0 4px 14px 0 rgba(46, 134, 171, 0.15);
+  }
+}

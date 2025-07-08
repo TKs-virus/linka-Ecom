@@ -1,0 +1,90 @@
+version: '3'
+
+services:
+  main:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    volumes:
+      - .:/app
+
+  ecom:
+    build:
+      context: ./Services/E-com
+      dockerfile: ../../Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+    volumes:
+      - ./Services/E-com:/app
+
+  elearning:
+    build:
+      context: ./Services/E-Learning
+      dockerfile: ../../Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+    volumes:
+      - ./Services/E-Learning:/app
+
+  fooddelivery:
+    build:
+      context: ./Services/Food-Delivery
+      dockerfile: ../../Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+    volumes:
+      - ./Services/Food-Delivery:/app
+
+  healthcare:
+    build:
+      context: ./Services/Healthcare
+      dockerfile: ../../Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+    volumes:
+      - ./Services/Healthcare:/app
+
+  travel_and_tourism:
+    build:
+      context: ./Services/Travel_&_Tourism
+      dockerfile: ../../Dockerfile
+    ports:
+      - "3005:3005"
+    environment:
+      - PORT=3005
+    volumes:
+      - ./Services/Travel_&_Tourism:/app
+
+  wholesale:
+    build:
+      context: ./Services/Wholesale
+      dockerfile: ../../Dockerfile
+    ports:
+      - "3006:3006"
+    environment:
+      - PORT=3006
+    volumes:
+      - ./Services/Wholesale:/app
+
+  travelandtourism:
+    build:
+      context: ./Services/Travel&Tourism
+      dockerfile: ../../Dockerfile
+    ports:
+      - "3007:3007"
+    environment:
+      - PORT=3007
+    volumes:
+      - ./Services/Travel&Tourism:/app
