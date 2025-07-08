@@ -5,6 +5,9 @@ import { RetailerCtaSection } from "@/components/landing/retailer-cta-section"
 import { DeliveryPartnerSection } from "@/components/landing/delivery-partner-section"
 import { AppFooter } from "@/components/landing/app-footer"
 import { Navigation } from "@/components/navigation"
+import { StatsSection } from "@/components/landing/stats-section"
+import { TestimonialsSection } from "@/components/landing/testimonials-section"
+import { ServicesOverview } from "@/components/landing/services-overview"
 
 export default function LandingPage() {
   return (
@@ -12,10 +15,13 @@ export default function LandingPage() {
       <Navigation />
       <main className="flex-1">
         <HeroSection />
+        <StatsSection />
+        <ServicesOverview />
         <HowItWorksSection />
         <FeaturedProductsSection />
-        <RetailerCtaSection />
+        <TestimonialsSection />
         <DeliveryPartnerSection />
+        <RetailerCtaSection />
       </main>
       <AppFooter />
     </div>
