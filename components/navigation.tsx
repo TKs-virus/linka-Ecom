@@ -2,46 +2,59 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { ShoppingCart, User, Search } from "lucide-react"
 
-/**
- * A simple, responsive top navigation bar that can be reused
- * across the marketing pages of the application.
- */
 export function Navigation() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo / Brand */}
-        <Link href="/" className="text-xl font-bold">
-          {"Linka"}
-        </Link>
+    <nav className="border-b bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <Link href="/" className="text-2xl font-bold text-gray-900">
+              Linka
+            </Link>
+          </div>
 
-        {/* Desktop links */}
-        <nav className="hidden gap-6 md:flex">
-          <Link href="/products" className="transition-colors hover:text-primary">
-            {"Products"}
-          </Link>
-          <Link href="/services" className="transition-colors hover:text-primary">
-            {"Services"}
-          </Link>
-          <Link href="/about" className="transition-colors hover:text-primary">
-            {"About"}
-          </Link>
-        </nav>
+          {/* Navigation Links */}
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-baseline space-x-4">
+              <Link href="/shop" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                Shop
+              </Link>
+              <Link
+                href="/orders"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Orders
+              </Link>
+              <Link
+                href="/profile"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Profile
+              </Link>
+            </div>
+          </div>
 
-        {/* Auth buttons */}
-        <div className="flex items-center gap-2">
-          <Link href="/login">
-            <Button variant="outline" size="sm">
-              {"Login"}
+          {/* Right side buttons */}
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="sm">
+              <Search className="h-4 w-4" />
             </Button>
-          </Link>
-          <Link href="/signup">
-            <Button size="sm">{"Sign Up"}</Button>
-          </Link>
+            <Button variant="ghost" size="sm">
+              <ShoppingCart className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm">
+              <User className="h-4 w-4" />
+            </Button>
+            <Button asChild>
+              <Link href="/login">Sign In</Link>
+            </Button>
+          </div>
         </div>
       </div>
-    </header>
+    </nav>
   )
 }
 
