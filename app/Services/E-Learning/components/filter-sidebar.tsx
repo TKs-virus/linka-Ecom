@@ -5,8 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 
@@ -60,71 +58,12 @@ export function FilterSidebar({ onFilterChange }: FilterSidebarProps) {
   }
 
   const subjectsList = [
-    // Technology (12 options)
     "Web Development",
     "Mobile Development",
     "Data Science",
     "Machine Learning",
-    "Artificial Intelligence",
-    "Cybersecurity",
-    "Cloud Computing",
-    "DevOps",
-    "Software Engineering",
-    "Game Development",
-    "Blockchain",
-    "Internet of Things (IoT)",
-
-    // Business (12 options)
     "Digital Marketing",
-    "Project Management",
-    "Entrepreneurship",
-    "Finance & Accounting",
-    "Sales & Customer Relations",
-    "Leadership & Management",
-    "Human Resources",
-    "Supply Chain Management",
-    "Business Analytics",
-    "E-commerce",
-    "Real Estate",
-    "Investment & Trading",
-
-    // Arts & Design (8 options)
     "Graphic Design",
-    "UI/UX Design",
-    "Photography",
-    "Video Editing",
-    "Music Production",
-    "Drawing & Painting",
-    "3D Modeling & Animation",
-    "Interior Design",
-
-    // Science & Engineering (8 options)
-    "Biology & Life Sciences",
-    "Chemistry",
-    "Physics",
-    "Mathematics",
-    "Environmental Science",
-    "Psychology",
-    "Medicine & Health",
-    "Engineering",
-
-    // Languages (8 options)
-    "English Language",
-    "Spanish",
-    "French",
-    "German",
-    "Chinese (Mandarin)",
-    "Japanese",
-    "Italian",
-    "Portuguese",
-
-    // Personal Development (6 options)
-    "Communication Skills",
-    "Time Management",
-    "Productivity & Organization",
-    "Mindfulness & Meditation",
-    "Career Development",
-    "Public Speaking",
   ]
 
   return (
@@ -140,7 +79,7 @@ export function FilterSidebar({ onFilterChange }: FilterSidebarProps) {
       <CardContent className="space-y-6">
         {/* Subjects */}
         <div>
-          <h3 className="font-semibold mb-3">Subjects/Disciplines</h3>
+          <h3 className="font-semibold mb-3">Subjects</h3>
           <div className="space-y-2">
             {subjectsList.map((subject) => (
               <div key={subject} className="flex items-center space-x-2">
@@ -180,27 +119,6 @@ export function FilterSidebar({ onFilterChange }: FilterSidebarProps) {
 
         <Separator />
 
-        {/* Learning Format */}
-        <div>
-          <h3 className="font-semibold mb-3">Learning Format</h3>
-          <div className="space-y-2">
-            {["Self-Paced", "Instructor-Led", "Bootcamp", "Certification", "Live Classes"].map((format) => (
-              <div key={format} className="flex items-center space-x-2">
-                <Checkbox
-                  id={format}
-                  checked={formats.includes(format)}
-                  onCheckedChange={(checked) => handleFormatChange(format, checked as boolean)}
-                />
-                <Label htmlFor={format} className="text-sm">
-                  {format}
-                </Label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <Separator />
-
         {/* Price */}
         <div>
           <h3 className="font-semibold mb-3">Price</h3>
@@ -225,43 +143,9 @@ export function FilterSidebar({ onFilterChange }: FilterSidebarProps) {
             </div>
           </RadioGroup>
         </div>
-
-        <Separator />
-
-        {/* Language */}
-        <div>
-          <h3 className="font-semibold mb-3">Language</h3>
-          <Select value={language} onValueChange={setLanguage}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Languages</SelectItem>
-              <SelectItem value="english">English</SelectItem>
-              <SelectItem value="spanish">Spanish</SelectItem>
-              <SelectItem value="french">French</SelectItem>
-              <SelectItem value="german">German</SelectItem>
-              <SelectItem value="chinese">Chinese</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <Separator />
-
-        {/* Instructor */}
-        <div>
-          <h3 className="font-semibold mb-3">Instructor</h3>
-          <Input
-            placeholder="Search instructor..."
-            value={instructor}
-            onChange={(e) => setInstructor(e.target.value)}
-          />
-        </div>
       </CardContent>
     </Card>
   )
 }
 
-// --- build-alias ---
-export const FilterSidebarComponent = FilterSidebar
-export default FilterSidebarComponent
+export default FilterSidebar

@@ -68,6 +68,4 @@ export function Testimonials() {
   )
 }
 
-// --- build-alias ---
-export const TestimonialsComponent = Testimonials
-export default TestimonialsComponent
+export default Testimonials

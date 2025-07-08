@@ -1,4 +1,4 @@
 import NewReleasesComponent from "../app/Services/E-Learning/components/new-releases"
 
-export const NewReleases = NewReleasesComponent
+export { NewReleases } from "../app/Services/E-Learning/components/new-releases"
 export default NewReleasesComponent

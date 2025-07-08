@@ -1,4 +1,4 @@
 import SearchSectionComponent from "../app/Services/E-Learning/components/search-section"
 
-export const SearchSection = SearchSectionComponent
+export { SearchSection } from "../app/Services/E-Learning/components/search-section"
 export default SearchSectionComponent

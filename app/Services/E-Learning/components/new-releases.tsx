@@ -75,6 +75,4 @@ export function NewReleases() {
   )
 }
 
-// --- build-alias ---
-export const NewReleasesComponent = NewReleases
-export default NewReleasesComponent
+export default NewReleases

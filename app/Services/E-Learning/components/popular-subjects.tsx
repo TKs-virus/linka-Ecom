@@ -70,6 +70,4 @@ export function PopularSubjects() {
   )
 }
 
-// --- build-alias ---
-export const PopularSubjectsComponent = PopularSubjects
-export default PopularSubjectsComponent
+export default PopularSubjects

@@ -75,6 +75,4 @@ export function TrendingCourses() {
   )
 }
 
-// --- build-alias ---
-export const TrendingCoursesComponent = TrendingCourses
-export default TrendingCoursesComponent
+export default TrendingCourses
