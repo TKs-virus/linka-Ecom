@@ -1,4 +1,5 @@
-FROM node:20-alpine
+# Multi-stage build for production
+FROM node:20-alpine AS base
 
 # Install pnpm globally
 RUN npm install -g pnpm
@@ -6,32 +7,49 @@ RUN npm install -g pnpm
 # Set working directory
 WORKDIR /app
 
-# Configure pnpm for better network handling
-RUN pnpm config set registry https://registry.npmjs.org/
-RUN pnpm config set network-timeout 300000
-RUN pnpm config set fetch-retries 5
-RUN pnpm config set fetch-retry-factor 2
-RUN pnpm config set fetch-retry-mintimeout 10000
-RUN pnpm config set fetch-retry-maxtimeout 60000
+# Configure pnpm for better reliability
+RUN pnpm config set registry https://registry.npmjs.org/ \
+    && pnpm config set fetch-retries 5 \
+    && pnpm config set fetch-retry-factor 2 \
+    && pnpm config set fetch-retry-mintimeout 10000 \
+    && pnpm config set fetch-retry-maxtimeout 60000
 
-# Copy package files
-COPY package.json ./
-COPY pnpm-lock.yaml* ./
+# Dependencies stage
+FROM base AS deps
+COPY package.json pnpm-lock.yaml* ./
+RUN pnpm install --frozen-lockfile --fetch-timeout=3000
 
-# Install dependencies with retry logic
-RUN pnpm install --frozen-lockfile --network-timeout=300000 || \
-    (sleep 10 && pnpm install --frozen-lockfile --network-timeout=300000) || \
-    (sleep 30 && pnpm install --frozen-lockfile --network-timeout=300000)
-
-# Copy source code
+# Builder stage
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Set environment variables
-ENV PORT=3000
-ENV NODE_ENV=development
+# Download fonts if missing
+RUN node download-fonts.js
 
-# Expose port
-EXPOSE $PORT
+# Build the application
+RUN pnpm build
 
-# Start the application
-CMD ["pnpm", "dev", "--port", "$PORT"]
+# Production stage
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=8900
+ENV HOSTNAME=0.0.0.0
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
+
+# Copy built application
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 8900
+
+# Start the Next.js standalone server
+CMD ["node", "server.js"]

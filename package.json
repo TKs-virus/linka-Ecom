@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "node download-fonts.js && next build",
     "dev": "next dev",
     "docker:clean": "docker-compose down --volumes --remove-orphans",
     "docker:dev": "./scripts/start-dev.sh",
     "docker:simple": "docker-compose -f docker-compose.simple.yml up --build",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "download-fonts": "node download-fonts.js"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "latest",
@@ -58,7 +59,8 @@
     "sonner": "latest",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "vaul": "latest"
+    "vaul": "latest",
+    "axios": "^1.10.0"
   },
   "devDependencies": {
     "@types/node": "^22",
