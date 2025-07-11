@@ -1,25 +1,11 @@
 import type React from "react"
 import type { Metadata } from "next"
-import localFont from "next/font/local"
+import { Inter } from "next/font/google"
 import "./globals.css"
 import { CartProvider } from "@/components/cart-provider"
 import { LocationProvider } from "@/components/location-provider"
 
-const inter = localFont({
-  src: [
-    {
-      path: "../../../public/fonts/inter/web/Inter-Regular.woff2",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "/fonts/inter/web/Inter-Bold.woff2",
-      weight: "700",
-      style: "normal",
-    },
-  ],
-  variable: "--font-inter",
-})
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Linka - Food Delivery",

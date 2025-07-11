@@ -1,25 +1,12 @@
 import type React from "react"
 import type { Metadata } from "next"
-import localFont from "next/font/local"
+import { Inter } from "next/font/google"
 import "./globals.css"
 import { Navigation } from "@/components/navigation"
 import { CartProvider } from "@/contexts/cart-context"
 
-const inter = localFont({
-  src: [
-    {
-      path: "../../../public/fonts/inter/web/Inter-Regular.woff2",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "/fonts/inter/web/Inter-Bold.woff2",
-      weight: "700",
-      style: "normal",
-    },
-  ],
-  variable: "--font-inter",
-})
+const inter = Inter({ subsets: ["latin"] })
+
 export const metadata: Metadata = {
   title: "Linka - Online Learning Platform",
   description: "Discover and learn with Linka's comprehensive course catalog",
