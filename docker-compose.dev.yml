@@ -1,0 +1,91 @@
+version: '3.8'
+
+networks:
+  linka-dev:
+    driver: bridge
+
+services:
+  # Development Main Platform
+  main-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - linka-dev
+    restart: unless-stopped
+
+  # Development Shop Instance
+  shop-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=development
+      - SHOP_REGION=dev
+      - SHOP_ID=dev-1
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - linka-dev
+    restart: unless-stopped
+
+  # Development E-commerce Service
+  ecommerce-dev:
+    build:
+      context: ./Services/E-com
+      dockerfile: ../../Dockerfile
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+      - NODE_ENV=development
+      - SERVICE_TYPE=ecommerce
+    volumes:
+      - ./Services/E-com:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - linka-dev
+    restart: unless-stopped
+
+  # Development E-learning Service
+  elearning-dev:
+    build:
+      context: ./Services/E-Learning
+      dockerfile: ../../Dockerfile
+    ports:
+      - "4002:4002"
+    environment:
+      - PORT=4002
+      - NODE_ENV=development
+      - SERVICE_TYPE=elearning
+    volumes:
+      - ./Services/E-Learning:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - linka-dev
+    restart: unless-stopped
+
+  # Redis for development
+  redis-dev:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - linka-dev
+    restart: unless-stopped

@@ -1,0 +1,420 @@
+version: '3.8'
+
+networks:
+  linka-main:
+    driver: bridge
+  shops-us-east:
+    driver: bridge
+  shops-us-west:
+    driver: bridge
+  shops-eu:
+    driver: bridge
+  shops-asia:
+    driver: bridge
+  services-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  postgres-data:
+
+services:
+  # Load Balancer
+  nginx-lb:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - linka-main
+      - shops-us-east
+      - shops-us-west
+      - shops-eu
+      - shops-asia
+      - services-network
+    depends_on:
+      - main-platform
+    restart: unless-stopped
+
+  # Main Platform
+  main-platform:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - linka-main
+      - services-network
+    depends_on:
+      - redis
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis-data:/data
+    networks:
+      - linka-main
+    restart: unless-stopped
+
+  # Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: linka_platform
+      POSTGRES_USER: linka_user
+      POSTGRES_PASSWORD: linka_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts:/docker-entrypoint-initdb.d
+    networks:
+      - linka-main
+    restart: unless-stopped
+
+  # ===== SHOP CLUSTERS BY LOCATION =====
+  
+  # US East Coast Shops
+  shop-us-east-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - SHOP_REGION=us-east
+      - SHOP_ID=us-east-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - shops-us-east
+      - linka-main
+    restart: unless-stopped
+
+  shop-us-east-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - SHOP_REGION=us-east
+      - SHOP_ID=us-east-2
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - shops-us-east
+      - linka-main
+    restart: unless-stopped
+
+  # US West Coast Shops
+  shop-us-west-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3002
+      - NODE_ENV=production
+      - SHOP_REGION=us-west
+      - SHOP_ID=us-west-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - shops-us-west
+      - linka-main
+    restart: unless-stopped
+
+  shop-us-west-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3002
+      - NODE_ENV=production
+      - SHOP_REGION=us-west
+      - SHOP_ID=us-west-2
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - shops-us-west
+      - linka-main
+    restart: unless-stopped
+
+  # European Shops
+  shop-eu-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3003
+      - NODE_ENV=production
+      - SHOP_REGION=eu
+      - SHOP_ID=eu-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - shops-eu
+      - linka-main
+    restart: unless-stopped
+
+  shop-eu-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3003
+      - NODE_ENV=production
+      - SHOP_REGION=eu
+      - SHOP_ID=eu-2
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - shops-eu
+      - linka-main
+    restart: unless-stopped
+
+  # Asian Shops
+  shop-asia-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3004
+      - NODE_ENV=production
+      - SHOP_REGION=asia
+      - SHOP_ID=asia-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - shops-asia
+      - linka-main
+    restart: unless-stopped
+
+  shop-asia-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3004
+      - NODE_ENV=production
+      - SHOP_REGION=asia
+      - SHOP_ID=asia-2
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - shops-asia
+      - linka-main
+    restart: unless-stopped
+
+  # ===== INDUSTRY/SERVICE CLUSTERS =====
+
+  # E-commerce Industry Cluster
+  ecommerce-service-1:
+    build:
+      context: ./Services/E-com
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4001
+      - NODE_ENV=production
+      - SERVICE_TYPE=ecommerce
+      - CLUSTER_ID=ecom-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  ecommerce-service-2:
+    build:
+      context: ./Services/E-com
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4001
+      - NODE_ENV=production
+      - SERVICE_TYPE=ecommerce
+      - CLUSTER_ID=ecom-2
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  # E-learning Industry Cluster
+  elearning-service-1:
+    build:
+      context: ./Services/E-Learning
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4002
+      - NODE_ENV=production
+      - SERVICE_TYPE=elearning
+      - CLUSTER_ID=elearn-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  elearning-service-2:
+    build:
+      context: ./Services/E-Learning
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4002
+      - NODE_ENV=production
+      - SERVICE_TYPE=elearning
+      - CLUSTER_ID=elearn-2
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  # Food Delivery Industry Cluster
+  fooddelivery-service-1:
+    build:
+      context: ./Services/Food-Delivery
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4003
+      - NODE_ENV=production
+      - SERVICE_TYPE=fooddelivery
+      - CLUSTER_ID=food-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  fooddelivery-service-2:
+    build:
+      context: ./Services/Food-Delivery
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4003
+      - NODE_ENV=production
+      - SERVICE_TYPE=fooddelivery
+      - CLUSTER_ID=food-2
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  # Healthcare Industry Cluster
+  healthcare-service-1:
+    build:
+      context: ./Services/Healthcare
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4004
+      - NODE_ENV=production
+      - SERVICE_TYPE=healthcare
+      - CLUSTER_ID=health-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  healthcare-service-2:
+    build:
+      context: ./Services/Healthcare
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4004
+      - NODE_ENV=production
+      - SERVICE_TYPE=healthcare
+      - CLUSTER_ID=health-2
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  # Travel & Tourism Industry Cluster
+  travel-service-1:
+    build:
+      context: ./Services/Travel_&_Tourism
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4005
+      - NODE_ENV=production
+      - SERVICE_TYPE=travel
+      - CLUSTER_ID=travel-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  travel-service-2:
+    build:
+      context: ./Services/Travel_&_Tourism
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4005
+      - NODE_ENV=production
+      - SERVICE_TYPE=travel
+      - CLUSTER_ID=travel-2
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  # Wholesale Industry Cluster
+  wholesale-service-1:
+    build:
+      context: ./Services/Wholesale
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4006
+      - NODE_ENV=production
+      - SERVICE_TYPE=wholesale
+      - CLUSTER_ID=wholesale-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  wholesale-service-2:
+    build:
+      context: ./Services/Wholesale
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4006
+      - NODE_ENV=production
+      - SERVICE_TYPE=wholesale
+      - CLUSTER_ID=wholesale-2
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  # ===== MONITORING & OBSERVABILITY =====
+  
+  # Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - linka-main
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./monitoring/grafana:/var/lib/grafana
+    networks:
+      - linka-main
+    restart: unless-stopped
