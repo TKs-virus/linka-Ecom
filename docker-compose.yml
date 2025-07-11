@@ -400,21 +400,129 @@ services:
   prometheus:
     image: prom/prometheus:latest
     ports:
-      - "9090:9090"
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
     volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - .:/app
+      - /app/node_modules
+      - /app/.next
     networks:
-      - linka-main
+      - linka-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  ecom:
+    build:
+      context: ./Services/E-com
+      dockerfile: ../../Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=development
+    volumes:
+      - ./Services/E-com:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - linka-network
     restart: unless-stopped
 
-  grafana:
-    image: grafana/grafana:latest
+  elearning:
+    build:
+      context: ./Services/E-Learning
+      dockerfile: ../../Dockerfile
     ports:
-      - "3001:3000"
+      - "3002:3002"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - PORT=3002
+      - NODE_ENV=development
     volumes:
-      - ./monitoring/grafana:/var/lib/grafana
+      - ./Services/E-Learning:/app
+      - /app/node_modules
+      - /app/.next
     networks:
-      - linka-main
+      - linka-network
     restart: unless-stopped
+
+  fooddelivery:
+    build:
+      context: ./Services/Food-Delivery
+      dockerfile: ../../Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - NODE_ENV=development
+    volumes:
+      - ./Services/Food-Delivery:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - linka-network
+    restart: unless-stopped
+
+  healthcare:
+    build:
+      context: ./Services/Healthcare
+      dockerfile: ../../Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - NODE_ENV=development
+    volumes:
+      - ./Services/Healthcare:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - linka-network
+    restart: unless-stopped
+
+  travel_and_tourism:
+    build:
+      context: ./Services/Travel_&_Tourism
+      dockerfile: ../../Dockerfile
+    ports:
+      - "3005:3005"
+    environment:
+      - PORT=3005
+      - NODE_ENV=development
+    volumes:
+      - ./Services/Travel_&_Tourism:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - linka-network
+    restart: unless-stopped
+
+  wholesale:
+    build:
+      context: ./Services/Wholesale
+      dockerfile: ../../Dockerfile
+    ports:
+      - "3006:3006"
+    environment:
+      - PORT=3006
+      - NODE_ENV=development
+    volumes:
+      - ./Services/Wholesale:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - linka-network
+    restart: unless-stopped
+
+networks:
+  linka-network:
+    driver: bridge
+
+volumes:
+  node_modules:
+  next_cache:

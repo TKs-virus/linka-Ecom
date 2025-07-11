@@ -1,91 +1,58 @@
-version: '3.8'
-
-networks:
-  linka-dev:
-    driver: bridge
-
 services:
-  # Development Main Platform
-  main-dev:
+  # Development environment with hot reload
+  dev-platform:
     build:
       context: .
       dockerfile: Dockerfile
+      target: dev
     ports:
       - "3000:3000"
     environment:
-      - PORT=3000
       - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
     volumes:
       - .:/app
       - /app/node_modules
       - /app/.next
     networks:
-      - linka-dev
-    restart: unless-stopped
+      - dev-network
 
-  # Development Shop Instance
-  shop-dev:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  # Development database
+  dev-postgres:
+    image: postgres:15-alpine
     ports:
-      - "3001:3001"
+      - "5432:5432"
     environment:
-      - PORT=3001
-      - NODE_ENV=development
-      - SHOP_REGION=dev
-      - SHOP_ID=dev-1
+      POSTGRES_DB: linka_dev
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
     volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
+      - dev-postgres-data:/var/lib/postgresql/data
+      - ./scripts:/docker-entrypoint-initdb.d
     networks:
-      - linka-dev
-    restart: unless-stopped
+      - dev-network
 
-  # Development E-commerce Service
-  ecommerce-dev:
-    build:
-      context: ./Services/E-com
-      dockerfile: ../../Dockerfile
-    ports:
-      - "4001:4001"
-    environment:
-      - PORT=4001
-      - NODE_ENV=development
-      - SERVICE_TYPE=ecommerce
-    volumes:
-      - ./Services/E-com:/app
-      - /app/node_modules
-      - /app/.next
-    networks:
-      - linka-dev
-    restart: unless-stopped
-
-  # Development E-learning Service
-  elearning-dev:
-    build:
-      context: ./Services/E-Learning
-      dockerfile: ../../Dockerfile
-    ports:
-      - "4002:4002"
-    environment:
-      - PORT=4002
-      - NODE_ENV=development
-      - SERVICE_TYPE=elearning
-    volumes:
-      - ./Services/E-Learning:/app
-      - /app/node_modules
-      - /app/.next
-    networks:
-      - linka-dev
-    restart: unless-stopped
-
-  # Redis for development
-  redis-dev:
+  # Development Redis
+  dev-redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
     networks:
-      - linka-dev
-    restart: unless-stopped
+      - dev-network
+
+  # Development monitoring
+  dev-prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - dev-network
+
+networks:
+  dev-network:
+    driver: bridge
+
+volumes:
+  dev-postgres-data:

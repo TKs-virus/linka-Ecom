@@ -1,27 +1,11 @@
 import type React from "react"
 import type { Metadata } from "next"
-import localFont from "next/font/local"
+import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 
-// Use local Inter font
-const inter = localFont({
-  src: [
-    {
-      path: "../public/fonts/inter/web/Inter-Regular.woff2",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/inter/web/Inter-Bold.woff2",
-      weight: "700",
-      style: "normal",
-    },
-    // Add more weights/styles if needed
-  ],
-  variable: "--font-inter",
-})
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Linka - Business Management Platform",
