@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { CreditCard, Wallet, Smartphone, Bitcoin, ArrowLeft, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -26,10 +26,25 @@ export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart } = useCart()
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card")
   const [isProcessing, setIsProcessing] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
   const totalPrice = getTotalPrice()
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted && items.length === 0) {
+      router.push("/cart")
+    }
+  }, [mounted, items.length, router])
+
+  if (!mounted) {
+    return null
+  }
+
   if (items.length === 0) {
-    router.push("/cart")
     return null
   }
 
