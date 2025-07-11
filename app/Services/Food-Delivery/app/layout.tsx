@@ -24,7 +24,7 @@ const inter = localFont({
 export const metadata: Metadata = {
   title: "Linka - Food Delivery",
   description: "Order food from your favorite restaurants",
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
