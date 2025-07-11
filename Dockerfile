@@ -17,9 +17,7 @@ RUN pnpm config set registry https://registry.npmjs.org/ && \
 # Dependencies stage
 FROM base AS deps
 COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile --network-timeout=300000 || \
-    (sleep 10 && pnpm install --frozen-lockfile --network-timeout=300000) || \
-    (sleep 30 && pnpm install --frozen-lockfile --network-timeout=300000)
+RUN pnpm install --network-timeout=300000
 
 # Development stage
 FROM base AS dev
