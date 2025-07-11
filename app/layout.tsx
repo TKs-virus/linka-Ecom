@@ -8,16 +8,16 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Linka - Your Local E-commerce Platform",
-  description: "Connect with local retailers and discover amazing products in your area",
+  title: "Linka - Business Management Platform",
+  description: "Comprehensive business management platform for retailers and customers",
   generator: "v0.dev",
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>

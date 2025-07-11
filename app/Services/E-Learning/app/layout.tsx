@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Linka - Online Learning Platform",
   description: "Discover and learn with Linka's comprehensive course catalog",
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
