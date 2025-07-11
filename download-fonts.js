@@ -2,33 +2,32 @@ const https = require("https")
 const fs = require("fs")
 const path = require("path")
 
-// Create fonts directory if it doesn't exist
+// Create public/fonts directory if it doesn't exist
 const fontsDir = path.join(__dirname, "public", "fonts")
 if (!fs.existsSync(fontsDir)) {
   fs.mkdirSync(fontsDir, { recursive: true })
 }
 
-// Font URLs (using Google Fonts)
+// Google Fonts URLs for the fonts we need
 const fonts = [
   {
-    name: "inter-regular.woff2",
-    url: "https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2",
+    name: "inter-400.woff2",
+    url: "https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2",
   },
   {
-    name: "inter-medium.woff2",
-    url: "https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuI6fAZ9hiJ-Ek-_EeA.woff2",
+    name: "inter-500.woff2",
+    url: "https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuOKfAZ9hiA.woff2",
   },
   {
-    name: "inter-semibold.woff2",
-    url: "https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hiJ-Ek-_EeA.woff2",
+    name: "inter-600.woff2",
+    url: "https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hiA.woff2",
   },
   {
-    name: "inter-bold.woff2",
-    url: "https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hiJ-Ek-_EeA.woff2",
+    name: "inter-700.woff2",
+    url: "https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hiA.woff2",
   },
 ]
 
-// Download function
 function downloadFont(font) {
   return new Promise((resolve, reject) => {
     const filePath = path.join(fontsDir, font.name)
@@ -55,7 +54,7 @@ function downloadFont(font) {
 
         file.on("finish", () => {
           file.close()
-          console.log(`✓ Downloaded ${font.name}`)
+          console.log(`Downloaded ${font.name}`)
           resolve()
         })
 
@@ -70,23 +69,21 @@ function downloadFont(font) {
   })
 }
 
-// Download all fonts
 async function downloadAllFonts() {
-  console.log("Starting font download...")
-
   try {
+    console.log("Starting font downloads...")
     await Promise.all(fonts.map(downloadFont))
-    console.log("✓ All fonts downloaded successfully!")
+    console.log("All fonts downloaded successfully!")
   } catch (error) {
-    console.error("✗ Error downloading fonts:", error.message)
+    console.error("Error downloading fonts:", error)
     // Don't fail the build if fonts can't be downloaded
     console.log("Continuing build without custom fonts...")
   }
 }
 
-// Run if called directly
+// Only run if this script is executed directly
 if (require.main === module) {
   downloadAllFonts()
 }
 
-module.exports = { downloadAllFonts }
+module.exports = downloadAllFonts

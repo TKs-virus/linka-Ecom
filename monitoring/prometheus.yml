@@ -11,76 +11,78 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'main-platform'
+  - job_name: 'nginx'
     static_configs:
-      - targets: ['main-platform:3000']
-    metrics_path: '/api/metrics'
-    scrape_interval: 30s
+      - targets: ['nginx:80']
+    metrics_path: /metrics
+    scrape_interval: 5s
 
-  - job_name: 'shops-us-east'
+  - job_name: 'shop-us-east'
     static_configs:
-      - targets: ['shop-us-east-1:3001', 'shop-us-east-2:3001']
-    metrics_path: '/api/metrics'
-    scrape_interval: 30s
+      - targets: ['shop-us-east-1:3000', 'shop-us-east-2:3000']
+    metrics_path: /api/metrics
+    scrape_interval: 10s
 
-  - job_name: 'shops-us-west'
+  - job_name: 'shop-us-west'
     static_configs:
-      - targets: ['shop-us-west-1:3002', 'shop-us-west-2:3002']
-    metrics_path: '/api/metrics'
-    scrape_interval: 30s
+      - targets: ['shop-us-west-1:3000', 'shop-us-west-2:3000']
+    metrics_path: /api/metrics
+    scrape_interval: 10s
 
-  - job_name: 'shops-eu'
+  - job_name: 'shop-eu'
     static_configs:
-      - targets: ['shop-eu-1:3003', 'shop-eu-2:3003']
-    metrics_path: '/api/metrics'
-    scrape_interval: 30s
+      - targets: ['shop-eu-1:3000', 'shop-eu-2:3000']
+    metrics_path: /api/metrics
+    scrape_interval: 10s
 
-  - job_name: 'shops-asia'
+  - job_name: 'shop-asia'
     static_configs:
-      - targets: ['shop-asia-1:3004', 'shop-asia-2:3004']
-    metrics_path: '/api/metrics'
-    scrape_interval: 30s
+      - targets: ['shop-asia-1:3000', 'shop-asia-2:3000']
+    metrics_path: /api/metrics
+    scrape_interval: 10s
 
   - job_name: 'ecommerce-services'
     static_configs:
-      - targets: ['ecommerce-service-1:4001', 'ecommerce-service-2:4001']
-    metrics_path: '/api/metrics'
-    scrape_interval: 30s
+      - targets: ['ecommerce-service-1:3000', 'ecommerce-service-2:3000']
+    metrics_path: /api/metrics
+    scrape_interval: 10s
 
   - job_name: 'elearning-services'
     static_configs:
-      - targets: ['elearning-service-1:4002', 'elearning-service-2:4002']
-    metrics_path: '/api/metrics'
-    scrape_interval: 30s
-
-  - job_name: 'fooddelivery-services'
-    static_configs:
-      - targets: ['fooddelivery-service-1:4003', 'fooddelivery-service-2:4003']
-    metrics_path: '/api/metrics'
-    scrape_interval: 30s
+      - targets: ['elearning-service-1:3000', 'elearning-service-2:3000']
+    metrics_path: /api/metrics
+    scrape_interval: 10s
 
   - job_name: 'healthcare-services'
     static_configs:
-      - targets: ['healthcare-service-1:4004', 'healthcare-service-2:4004']
-    metrics_path: '/api/metrics'
-    scrape_interval: 30s
+      - targets: ['healthcare-service-1:3000', 'healthcare-service-2:3000']
+    metrics_path: /api/metrics
+    scrape_interval: 10s
+
+  - job_name: 'fooddelivery-services'
+    static_configs:
+      - targets: ['fooddelivery-service-1:3000', 'fooddelivery-service-2:3000']
+    metrics_path: /api/metrics
+    scrape_interval: 10s
 
   - job_name: 'travel-services'
     static_configs:
-      - targets: ['travel-service-1:4005', 'travel-service-2:4005']
-    metrics_path: '/api/metrics'
-    scrape_interval: 30s
+      - targets: ['travel-service-1:3000', 'travel-service-2:3000']
+    metrics_path: /api/metrics
+    scrape_interval: 10s
 
   - job_name: 'wholesale-services'
     static_configs:
-      - targets: ['wholesale-service-1:4006', 'wholesale-service-2:4006']
-    metrics_path: '/api/metrics'
+      - targets: ['wholesale-service-1:3000', 'wholesale-service-2:3000']
+    metrics_path: /api/metrics
+    scrape_interval: 10s
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
     scrape_interval: 30s
 
   - job_name: 'redis'
     static_configs:
       - targets: ['redis:6379']
-
-  - job_name: 'postgres'
-    static_configs:
-      - targets: ['postgres:5432']
+    scrape_interval: 30s
