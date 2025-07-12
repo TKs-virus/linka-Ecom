@@ -14,7 +14,6 @@ import {
   HelpCircle,
   LogOut,
   Megaphone,
-  TrendingUp,
   Gift,
 } from "lucide-react"
 
@@ -73,11 +72,6 @@ const data = {
       title: "Promotions",
       url: "/dashboard/marketing/promotions",
       icon: Gift,
-    },
-    {
-      title: "Performance",
-      url: "/dashboard/performance",
-      icon: TrendingUp,
     },
   ],
   support: [
