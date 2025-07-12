@@ -4,6 +4,43 @@ import { createServerClient } from "@/lib/supabase/server"
 import { getCurrentUser } from "./auth-actions"
 import { revalidatePath } from "next/cache"
 
+// Mock product data - in a real app, this would come from your database
+const mockProducts = [
+  {
+    id: "1",
+    name: "Wireless Bluetooth Headphones",
+    sku: "WBH-001",
+    category: "Electronics",
+    price: 299.99,
+    stock_quantity: 45,
+    status: "active",
+    description: "High-quality wireless headphones with noise cancellation",
+    brand: "TechSound",
+  },
+  {
+    id: "2",
+    name: "Cotton T-Shirt",
+    sku: "CTS-002",
+    category: "Clothing",
+    price: 29.99,
+    stock_quantity: 120,
+    status: "active",
+    description: "Comfortable 100% cotton t-shirt",
+    brand: "ComfortWear",
+  },
+  {
+    id: "3",
+    name: "Smart Watch",
+    sku: "SW-003",
+    category: "Electronics",
+    price: 199.99,
+    stock_quantity: 8,
+    status: "active",
+    description: "Feature-rich smartwatch with health tracking",
+    brand: "SmartTech",
+  },
+]
+
 export interface Product {
   id: string
   retailer_id: string
@@ -56,20 +93,8 @@ export async function getProducts(filters?: {
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-  const supabase = createServerClient()
-
-  const { data: product, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("id", id)
-    .eq("is_active", true)
-    .single()
-
-  if (error || !product) {
-    return null
-  }
-
-  return product as Product
+  await new Promise((resolve) => setTimeout(resolve, 100))
+  return mockProducts.find((product) => product.id === id) || null
 }
 
 export async function getRetailerProducts(): Promise<Product[]> {
@@ -78,26 +103,9 @@ export async function getRetailerProducts(): Promise<Product[]> {
     throw new Error("Unauthorized")
   }
 
-  const supabase = createServerClient()
-
-  // Get retailer profile
-  const { data: retailer } = await supabase.from("retailers").select("id").eq("user_id", user.id).single()
-
-  if (!retailer) {
-    throw new Error("Retailer profile not found")
-  }
-
-  const { data: products, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("retailer_id", retailer.id)
-    .order("created_at", { ascending: false })
-
-  if (error) {
-    throw new Error("Failed to fetch products")
-  }
-
-  return products as Product[]
+  // Simulate API delay
+  await new Promise((resolve) => setTimeout(resolve, 100))
+  return mockProducts
 }
 
 export type CreateProductState = {

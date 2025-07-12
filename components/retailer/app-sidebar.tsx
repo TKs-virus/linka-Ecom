@@ -39,56 +39,56 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/retailers/dashboard",
+      url: "/dashboard",
       icon: Home,
     },
     {
       title: "Products",
-      url: "/retailers/dashboard/products",
+      url: "/dashboard/products",
       icon: Package,
     },
     {
       title: "Orders",
-      url: "/retailers/dashboard/orders",
+      url: "/dashboard/orders",
       icon: ShoppingCart,
     },
     {
       title: "Customers",
-      url: "/retailers/dashboard/customers",
+      url: "/dashboard/customers",
       icon: Users,
     },
     {
       title: "Analytics",
-      url: "/retailers/dashboard/analytics",
+      url: "/dashboard/analytics",
       icon: BarChart3,
     },
   ],
   marketing: [
     {
       title: "Marketing",
-      url: "/retailers/dashboard/marketing",
+      url: "/dashboard/marketing",
       icon: Megaphone,
     },
     {
       title: "Promotions",
-      url: "/retailers/dashboard/marketing/promotions",
+      url: "/dashboard/marketing/promotions",
       icon: Gift,
     },
     {
       title: "Performance",
-      url: "/retailers/dashboard/performance",
+      url: "/dashboard/performance",
       icon: TrendingUp,
     },
   ],
   support: [
     {
       title: "Settings",
-      url: "/retailers/dashboard/settings",
+      url: "/dashboard/settings",
       icon: Settings,
     },
     {
       title: "Help & Support",
-      url: "/retailers/dashboard/help",
+      url: "/dashboard/help",
       icon: HelpCircle,
     },
   ],
