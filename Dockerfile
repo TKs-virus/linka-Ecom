@@ -6,23 +6,23 @@ RUN npm install -g pnpm
 # Set working directory
 WORKDIR /app
 
-# Configure pnpm for better network handling
-RUN pnpm config set registry https://registry.npmjs.org/ && \
-   pnpm config set network-timeout 300000 && \
-   pnpm config set fetch-retries 5 && \
-   pnpm config set fetch-retry-factor 2 && \
-   pnpm config set fetch-retry-mintimeout 10000 && \
-   pnpm config set fetch-retry-maxtimeout 60000
+# Configure pnpm for better network handling with Taobao registry
+RUN pnpm config set registry https://registry.npm.taobao.org/ && \
+   pnpm config set network-timeout 600000 && \
+   pnpm config set fetch-retries 10 && \
+   pnpm config set fetch-retry-factor 3 && \
+   pnpm config set fetch-retry-mintimeout 20000 && \
+   pnpm config set fetch-retry-maxtimeout 120000
 
 # Dependencies stage
 FROM base AS deps
 COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --network-timeout=300000
+RUN pnpm install --network-timeout=600000 --fetch-retries=10
 
 # Development stage
 FROM base AS dev
 COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --network-timeout=300000
+RUN pnpm install --network-timeout=600000 --fetch-retries=10
 COPY . .
 EXPOSE 3000
 CMD ["pnpm", "dev"]
