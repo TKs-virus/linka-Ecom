@@ -4,24 +4,18 @@ import { FeaturedProductsSection } from "@/components/landing/featured-products-
 import { RetailerCtaSection } from "@/components/landing/retailer-cta-section"
 import { DeliveryPartnerSection } from "@/components/landing/delivery-partner-section"
 import { AppFooter } from "@/components/landing/app-footer"
-import { Navigation } from "@/components/navigation"
-import { StatsSection } from "@/components/landing/stats-section"
-import { TestimonialsSection } from "@/components/landing/testimonials-section"
-import { ServicesOverview } from "@/components/landing/services-overview"
+import { MainNav } from "@/components/landing/main-nav"
 
-export default function LandingPage() {
+export default function HomePage() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navigation />
-      <main className="flex-1">
+    <div className="min-h-screen bg-white">
+      <MainNav />
+      <main>
         <HeroSection />
-        <StatsSection />
-        <ServicesOverview />
         <HowItWorksSection />
         <FeaturedProductsSection />
-        <TestimonialsSection />
-        <DeliveryPartnerSection />
         <RetailerCtaSection />
+        <DeliveryPartnerSection />
       </main>
       <AppFooter />
     </div>
