@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -71,15 +72,16 @@ export default function CustomersPage() {
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState("")
 
-  const filteredCustomers = customers.filter(customer =>
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.phone.includes(searchTerm)
+  const filteredCustomers = customers.filter(
+    (customer) =>
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.phone.includes(searchTerm),
   )
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedCustomers(filteredCustomers.map(customer => customer.id))
+      setSelectedCustomers(filteredCustomers.map((customer) => customer.id))
     } else {
       setSelectedCustomers([])
     }
@@ -87,9 +89,9 @@ export default function CustomersPage() {
 
   const handleSelectCustomer = (customerId: string, checked: boolean) => {
     if (checked) {
-      setSelectedCustomers(prev => [...prev, customerId])
+      setSelectedCustomers((prev) => [...prev, customerId])
     } else {
-      setSelectedCustomers(prev => prev.filter(id => id !== customerId))
+      setSelectedCustomers((prev) => prev.filter((id) => id !== customerId))
     }
   }
 
@@ -101,16 +103,16 @@ export default function CustomersPage() {
       } else {
         const result = await bulkUpdateCustomers(selectedCustomers, action, value)
         toast.success(result.message)
-        
+
         // Update local state to reflect changes
         if (action === "updateStatus") {
-          setCustomers(prev => prev.map(customer => 
-            selectedCustomers.includes(customer.id) 
-              ? { ...customer, status: value || customer.status }
-              : customer
-          ))
+          setCustomers((prev) =>
+            prev.map((customer) =>
+              selectedCustomers.includes(customer.id) ? { ...customer, status: value || customer.status } : customer,
+            ),
+          )
         } else if (action === "archive") {
-          setCustomers(prev => prev.filter(customer => !selectedCustomers.includes(customer.id)))
+          setCustomers((prev) => prev.filter((customer) => !selectedCustomers.includes(customer.id)))
         }
       }
     } catch (error) {
@@ -180,9 +182,9 @@ export default function CustomersPage() {
         <CardContent>
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search by name, email, or phone..." 
-              className="pl-10" 
+            <Input
+              placeholder="Search by name, email, or phone..."
+              className="pl-10"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -269,7 +271,25 @@ export default function CustomersPage() {
                   <TableCell>ZMW {customer.totalSpent.toFixed(2)}</TableCell>
                   <TableCell>{new Date(customer.lastOrder).toLocaleDateString()}</TableCell>
                   <TableCell>
-                    <Badge 
+                    <Badge
                       variant={
-                        customer.status === "active" ? "default" : 
-                        customer.status ===
+                        customer.status === "active" ? "default" : customer.status === "vip" ? "default" : "secondary"
+                      }
+                    >
+                      {customer.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="outline" size="sm">
+                      View Details
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
