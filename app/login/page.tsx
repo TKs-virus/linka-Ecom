@@ -31,6 +31,11 @@ export default function LoginPage() {
             <Link href="/signup">Sign up</Link>
           </Button>
         </div>
+        <div className="text-center">
+          <Button variant="secondary" asChild>
+            <Link href="/retailer-demo">Login as Guest</Link>
+          </Button>
+        </div>
       </div>
     </div>
   )
