@@ -1,7 +1,7 @@
 import { HowItWorksSection } from "@/components/landing/how-it-works-section"
 import { FeaturedProductsSection } from "@/components/landing/featured-products-section"
 import { DeliveryPartnerSection } from "@/components/landing/delivery-partner-section"
-import { RetailerCTASection } from "@/components/landing/retailer-cta-section"
+import { RetailerCtaSection } from "@/components/landing/retailer-cta-section"
 import { AppFooter } from "@/components/landing/app-footer"
 import { MainNav } from "@/components/landing/main-nav"
 import { Button } from "@/components/ui/button"
@@ -172,7 +172,7 @@ export default function HomePage() {
       <HowItWorksSection />
       <FeaturedProductsSection />
       <DeliveryPartnerSection />
-      <RetailerCTASection />
+      <RetailerCtaSection />
       <AppFooter />
     </div>
   )
