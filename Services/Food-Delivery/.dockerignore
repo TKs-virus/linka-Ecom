@@ -26,3 +26,6 @@ logs
 .idea/
 tmp/
 temp/
+dist/
+build/
+out/
