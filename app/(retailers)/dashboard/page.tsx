@@ -4,13 +4,19 @@ import { getRetailerProducts } from "@/app/actions/product-actions"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { DollarSign, Package, ShoppingCart, TrendingUp } from "lucide-react"
+import { demoOrders, demoPromotions, demoProducts } from "@/lib/demo-data"
 
 export default async function DashboardPage() {
-  const [orders, promotions, products] = await Promise.all([
-    getRetailerOrders(),
-    getPromotions(),
-    getRetailerProducts(),
-  ])
+  let orders = demoOrders
+  let promotions = demoPromotions
+  let products = demoProducts
+
+  try {
+    ;[orders, promotions, products] = await Promise.all([getRetailerOrders(), getPromotions(), getRetailerProducts()])
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn("Using demo data because:", err)
+  }
 
   const totalRevenue = orders
     .filter((order) => order.payment_status === "paid")
