@@ -1,19 +1,38 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Search, Users, UserPlus, Mail, Phone } from "lucide-react"
+import { Search, Users, UserPlus, Mail, Phone, MoreHorizontal } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import { BulkActionsToolbar } from "@/components/retailer/bulk-actions-toolbar"
 import { bulkUpdateCustomers, exportData } from "@/app/actions/bulk-actions"
 import { toast } from "sonner"
 
-// Mock customer data
-const mockCustomers = [
+/* -------------------------------------------------------------------------- */
+/*                              Mock data (demo)                              */
+/* -------------------------------------------------------------------------- */
+
+export type CustomerStatus = "active" | "inactive" | "vip"
+
+interface Customer {
+  id: string
+  name: string
+  email: string
+  phone: string
+  orders: number
+  totalSpent: number
+  lastOrder: string
+  status: CustomerStatus
+}
+
+const mockCustomers: Customer[] = [
   {
     id: "1",
     name: "John Doe",
@@ -66,113 +85,102 @@ const mockCustomers = [
   },
 ]
 
+/* -------------------------------------------------------------------------- */
+
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState(mockCustomers)
+  const [customers, setCustomers] = useState<Customer[]>(mockCustomers)
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState("")
 
-  const filteredCustomers = customers.filter(customer =>
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.phone.includes(searchTerm)
+  /* ---------------------------- Filter & Search --------------------------- */
+  const filteredCustomers = customers.filter(
+    (customer) =>
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.phone.includes(searchTerm),
   )
 
+  /* ---------------------------- Selection logic --------------------------- */
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedCustomers(filteredCustomers.map(customer => customer.id))
+      setSelectedCustomers(filteredCustomers.map((c) => c.id))
     } else {
       setSelectedCustomers([])
     }
   }
 
-  const handleSelectCustomer = (customerId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedCustomers(prev => [...prev, customerId])
-    } else {
-      setSelectedCustomers(prev => prev.filter(id => id !== customerId))
-    }
-  }
-
-  const handleBulkAction = async (action: string, value?: string) => {
-    try {
-      if (action === "export") {
-        const result = await exportData("customers", selectedCustomers)
-        toast.success(result.message)
-      } else {
-        const result = await bulkUpdateCustomers(selectedCustomers, action, value)
-        toast.success(result.message)
-        
-        // Update local state to reflect changes
-        if (action === "updateStatus") {
-          setCustomers(prev => prev.map(customer => 
-            selectedCustomers.includes(customer.id) 
-              ? { ...customer, status: value || customer.status }
-              : customer
-          ))
-        } else if (action === "archive") {
-          setCustomers(prev => prev.filter(customer => !selectedCustomers.includes(customer.id)))
-        }
-      }
-    } catch (error) {
-      toast.error("Failed to perform bulk action")
-    }
+  const handleSelectCustomer = (id: string, checked: boolean) => {
+    setSelectedCustomers((prev) => (checked ? [...prev, id] : prev.filter((cid) => cid !== id)))
   }
 
   const isAllSelected = filteredCustomers.length > 0 && selectedCustomers.length === filteredCustomers.length
   const isIndeterminate = selectedCustomers.length > 0 && selectedCustomers.length < filteredCustomers.length
 
+  /* ----------------------------- Bulk actions ----------------------------- */
+  const handleBulkAction = async (action: string, value?: string) => {
+    try {
+      if (action === "export") {
+        const result = await exportData("customers", selectedCustomers)
+        toast.success(result.message)
+        return
+      }
+
+      const result = await bulkUpdateCustomers(selectedCustomers, action, value)
+      toast.success(result.message)
+
+      // update UI
+      if (action === "updateStatus") {
+        setCustomers((prev) =>
+          prev.map((c) => (selectedCustomers.includes(c.id) ? { ...c, status: value as CustomerStatus } : c)),
+        )
+      } else if (action === "archive") {
+        setCustomers((prev) => prev.filter((c) => !selectedCustomers.includes(c.id)))
+      }
+
+      setSelectedCustomers([])
+    } catch {
+      toast.error("Failed to perform bulk action")
+    }
+  }
+
+  /* ------------------------------ Render page ----------------------------- */
   return (
     <div className="space-y-8 p-4 md:p-6">
+      {/* heading */}
       <div>
         <h1 className="text-3xl font-bold">Customers</h1>
         <p className="text-muted-foreground">Manage your customer relationships</p>
       </div>
 
-      {/* Customer Stats */}
+      {/* stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{customers.length}</div>
-            <p className="text-xs text-muted-foreground">Registered customers</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
-            <UserPlus className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{customers.filter((c) => c.status === "active").length}</div>
-            <p className="text-xs text-muted-foreground">Active this month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">VIP Customers</CardTitle>
-            <Badge className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{customers.filter((c) => c.status === "vip").length}</div>
-            <p className="text-xs text-muted-foreground">High-value customers</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Repeat Customers</CardTitle>
-            <Users className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{customers.filter((c) => c.orders > 1).length}</div>
-            <p className="text-xs text-muted-foreground">Multiple orders</p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Total Customers"
+          icon={<Users className="h-4 w-4 text-muted-foreground" />}
+          value={customers.length}
+          hint="Registered customers"
+        />
+        <StatCard
+          title="Active Customers"
+          icon={<UserPlus className="h-4 w-4 text-green-600" />}
+          value={customers.filter((c) => c.status === "active").length}
+          hint="Active this month"
+        />
+        <StatCard
+          title="VIP Customers"
+          icon={<Badge className="h-4 w-4 text-muted-foreground" />}
+          value={customers.filter((c) => c.status === "vip").length}
+          hint="High-value customers"
+        />
+        <StatCard
+          title="Repeat Customers"
+          icon={<Users className="h-4 w-4 text-blue-600" />}
+          value={customers.filter((c) => c.orders > 1).length}
+          hint="Multiple orders"
+        />
       </div>
 
-      {/* Search */}
+      {/* search */}
       <Card>
         <CardHeader>
           <CardTitle>Search Customers</CardTitle>
@@ -180,9 +188,9 @@ export default function CustomersPage() {
         <CardContent>
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search by name, email, or phone..." 
-              className="pl-10" 
+            <Input
+              placeholder="Search by name, email, or phone..."
+              className="pl-10"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -190,16 +198,16 @@ export default function CustomersPage() {
         </CardContent>
       </Card>
 
-      {/* Bulk Actions Toolbar */}
+      {/* bulk actions */}
       <BulkActionsToolbar
         selectedCount={selectedCustomers.length}
+        selectedIds={selectedCustomers}
         onClearSelection={() => setSelectedCustomers([])}
         type="customers"
-        selectedIds={selectedCustomers}
         onBulkAction={handleBulkAction}
       />
 
-      {/* Customers Table */}
+      {/* table */}
       <Card>
         <CardHeader>
           <CardTitle>Customer List</CardTitle>
@@ -236,10 +244,12 @@ export default function CustomersPage() {
                       aria-label={`Select ${customer.name}`}
                     />
                   </TableCell>
+
+                  {/* Customer */}
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={`/placeholder-user.jpg`} />
+                        <AvatarImage src="/placeholder-user.jpg" alt={customer.name} />
                         <AvatarFallback>
                           {customer.name
                             .split(" ")
@@ -253,6 +263,8 @@ export default function CustomersPage() {
                       </div>
                     </div>
                   </TableCell>
+
+                  {/* Contact */}
                   <TableCell>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm">
@@ -265,11 +277,68 @@ export default function CustomersPage() {
                       </div>
                     </div>
                   </TableCell>
+
                   <TableCell>{customer.orders} orders</TableCell>
                   <TableCell>ZMW {customer.totalSpent.toFixed(2)}</TableCell>
                   <TableCell>{new Date(customer.lastOrder).toLocaleDateString()}</TableCell>
+
+                  {/* status */}
                   <TableCell>
-                    <Badge 
+                    <Badge
                       variant={
-                        customer.status === "active" ? "default" : 
-                        customer.status ===
+                        customer.status === "active" ? "secondary" : customer.status === "vip" ? "default" : "outline"
+                      }
+                    >
+                      {customer.status.toUpperCase()}
+                    </Badge>
+                  </TableCell>
+
+                  {/* actions */}
+                  <TableCell className="text-right">
+                    <Button size="icon" variant="ghost" aria-label="More actions">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+
+              {filteredCustomers.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="py-12 text-center">
+                    No customers found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+/*                          Reusable stat-card component                      */
+/* -------------------------------------------------------------------------- */
+
+interface StatCardProps {
+  title: string
+  icon: React.ReactNode
+  value: number
+  hint: string
+}
+
+function StatCard({ title, icon, value, hint }: StatCardProps) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        {icon}
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        <p className="text-xs text-muted-foreground">{hint}</p>
+      </CardContent>
+    </Card>
+  )
+}
