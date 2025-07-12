@@ -1,15 +1,82 @@
-import { getRetailerOrders } from "@/app/actions/order-actions"
+"use client"
+
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Search, Eye, Package, Truck } from "lucide-react"
 import Link from "next/link"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { BulkActionsToolbar } from "@/components/retailer/bulk-actions-toolbar"
+import { bulkUpdateOrders, exportData } from "@/app/actions/bulk-actions"
+import { toast } from "sonner"
 
-export default async function OrdersPage() {
-  const orders = await getRetailerOrders()
+// Mock order data
+const mockOrders = [
+  {
+    id: "ord_001",
+    customer_name: "John Doe",
+    customer_email: "john@example.com",
+    created_at: "2024-01-15T10:30:00Z",
+    items: [{ name: "Wireless Headphones", quantity: 1 }],
+    total_amount: 299.99,
+    status: "pending",
+  },
+  {
+    id: "ord_002",
+    customer_name: "Jane Smith",
+    customer_email: "jane@example.com",
+    created_at: "2024-01-14T15:45:00Z",
+    items: [{ name: "Cotton T-Shirt", quantity: 2 }],
+    total_amount: 59.98,
+    status: "processing",
+  },
+  {
+    id: "ord_003",
+    customer_name: "Mike Johnson",
+    customer_email: "mike@example.com",
+    created_at: "2024-01-13T09:15:00Z",
+    items: [{ name: "Smart Watch", quantity: 1 }],
+    total_amount: 199.99,
+    status: "shipped",
+  },
+  {
+    id: "ord_004",
+    customer_name: "Sarah Wilson",
+    customer_email: "sarah@example.com",
+    created_at: "2024-01-12T14:20:00Z",
+    items: [{ name: "Running Shoes", quantity: 1 }],
+    total_amount: 89.99,
+    status: "delivered",
+  },
+  {
+    id: "ord_005",
+    customer_name: "Tom Brown",
+    customer_email: "tom@example.com",
+    created_at: "2024-01-11T11:00:00Z",
+    items: [{ name: "Coffee Maker", quantity: 1 }],
+    total_amount: 149.99,
+    status: "cancelled",
+  },
+]
+
+export default function OrdersPage() {
+  const [orders, setOrders] = useState(mockOrders)
+  const [selectedOrders, setSelectedOrders] = useState<string[]>([])
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
+
+  const filteredOrders = orders.filter((order) => {
+    const matchesSearch =
+      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer_email.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === "all" || order.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -27,6 +94,52 @@ export default async function OrdersPage() {
         return "secondary"
     }
   }
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedOrders(filteredOrders.map((order) => order.id))
+    } else {
+      setSelectedOrders([])
+    }
+  }
+
+  const handleSelectOrder = (orderId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedOrders((prev) => [...prev, orderId])
+    } else {
+      setSelectedOrders((prev) => prev.filter((id) => id !== orderId))
+    }
+  }
+
+  const handleBulkAction = async (action: string, value?: string) => {
+    try {
+      if (action === "export") {
+        const result = await exportData("orders", selectedOrders)
+        toast.success(result.message)
+      } else {
+        const result = await bulkUpdateOrders(selectedOrders, action, value)
+        toast.success(result.message)
+
+        // Update local state to reflect changes
+        if (action === "updateStatus") {
+          setOrders((prev) =>
+            prev.map((order) =>
+              selectedOrders.includes(order.id) ? { ...order, status: value || order.status } : order,
+            ),
+          )
+        } else if (action === "cancel") {
+          setOrders((prev) =>
+            prev.map((order) => (selectedOrders.includes(order.id) ? { ...order, status: "cancelled" } : order)),
+          )
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to perform bulk action")
+    }
+  }
+
+  const isAllSelected = filteredOrders.length > 0 && selectedOrders.length === filteredOrders.length
+  const isIndeterminate = selectedOrders.length > 0 && selectedOrders.length < filteredOrders.length
 
   return (
     <div className="space-y-8 p-4 md:p-6">
@@ -88,9 +201,14 @@ export default async function OrdersPage() {
           <div className="flex gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search by order ID, customer name..." className="pl-10" />
+              <Input
+                placeholder="Search by order ID, customer name..."
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -107,14 +225,23 @@ export default async function OrdersPage() {
         </CardContent>
       </Card>
 
+      {/* Bulk Actions Toolbar */}
+      <BulkActionsToolbar
+        selectedCount={selectedOrders.length}
+        onClearSelection={() => setSelectedOrders([])}
+        type="orders"
+        selectedIds={selectedOrders}
+        onBulkAction={handleBulkAction}
+      />
+
       {/* Orders Table */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Orders</CardTitle>
-          <CardDescription>{orders.length} orders found</CardDescription>
+          <CardDescription>{filteredOrders.length} orders found</CardDescription>
         </CardHeader>
         <CardContent>
-          {orders.length === 0 ? (
+          {filteredOrders.length === 0 ? (
             <div className="text-center py-8">
               <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-muted-foreground mb-2">No orders found</p>
@@ -124,6 +251,14 @@ export default async function OrdersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={isAllSelected}
+                      onCheckedChange={handleSelectAll}
+                      aria-label="Select all orders"
+                      {...(isIndeterminate && { "data-state": "indeterminate" })}
+                    />
+                  </TableHead>
                   <TableHead>Order ID</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Date</TableHead>
@@ -134,9 +269,16 @@ export default async function OrdersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
+                {filteredOrders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">#{order.id.slice(0, 8)}</TableCell>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedOrders.includes(order.id)}
+                        onCheckedChange={(checked) => handleSelectOrder(order.id, checked as boolean)}
+                        aria-label={`Select order ${order.id}`}
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">#{order.id.slice(-6)}</TableCell>
                     <TableCell>
                       <div>
                         <p className="font-medium">{order.customer_name || "Guest"}</p>

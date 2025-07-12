@@ -1,13 +1,19 @@
+"use client"
+
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Search, Users, UserPlus, Mail, Phone } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { BulkActionsToolbar } from "@/components/retailer/bulk-actions-toolbar"
+import { bulkUpdateCustomers, exportData } from "@/app/actions/bulk-actions"
+import { toast } from "sonner"
 
 // Mock customer data
-const customers = [
+const mockCustomers = [
   {
     id: "1",
     name: "John Doe",
@@ -38,9 +44,83 @@ const customers = [
     lastOrder: "2024-01-05",
     status: "inactive",
   },
+  {
+    id: "4",
+    name: "Sarah Wilson",
+    email: "sarah@example.com",
+    phone: "+260 94 777 8888",
+    orders: 15,
+    totalSpent: 3200.0,
+    lastOrder: "2024-01-18",
+    status: "vip",
+  },
+  {
+    id: "5",
+    name: "Tom Brown",
+    email: "tom@example.com",
+    phone: "+260 93 444 5555",
+    orders: 1,
+    totalSpent: 149.99,
+    lastOrder: "2024-01-01",
+    status: "inactive",
+  },
 ]
 
 export default function CustomersPage() {
+  const [customers, setCustomers] = useState(mockCustomers)
+  const [selectedCustomers, setSelectedCustomers] = useState<string[]>([])
+  const [searchTerm, setSearchTerm] = useState("")
+
+  const filteredCustomers = customers.filter(customer =>
+    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.phone.includes(searchTerm)
+  )
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedCustomers(filteredCustomers.map(customer => customer.id))
+    } else {
+      setSelectedCustomers([])
+    }
+  }
+
+  const handleSelectCustomer = (customerId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedCustomers(prev => [...prev, customerId])
+    } else {
+      setSelectedCustomers(prev => prev.filter(id => id !== customerId))
+    }
+  }
+
+  const handleBulkAction = async (action: string, value?: string) => {
+    try {
+      if (action === "export") {
+        const result = await exportData("customers", selectedCustomers)
+        toast.success(result.message)
+      } else {
+        const result = await bulkUpdateCustomers(selectedCustomers, action, value)
+        toast.success(result.message)
+        
+        // Update local state to reflect changes
+        if (action === "updateStatus") {
+          setCustomers(prev => prev.map(customer => 
+            selectedCustomers.includes(customer.id) 
+              ? { ...customer, status: value || customer.status }
+              : customer
+          ))
+        } else if (action === "archive") {
+          setCustomers(prev => prev.filter(customer => !selectedCustomers.includes(customer.id)))
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to perform bulk action")
+    }
+  }
+
+  const isAllSelected = filteredCustomers.length > 0 && selectedCustomers.length === filteredCustomers.length
+  const isIndeterminate = selectedCustomers.length > 0 && selectedCustomers.length < filteredCustomers.length
+
   return (
     <div className="space-y-8 p-4 md:p-6">
       <div>
@@ -72,12 +152,12 @@ export default function CustomersPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Order Value</CardTitle>
+            <CardTitle className="text-sm font-medium">VIP Customers</CardTitle>
             <Badge className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">ZMW 815</div>
-            <p className="text-xs text-muted-foreground">Per customer</p>
+            <div className="text-2xl font-bold">{customers.filter((c) => c.status === "vip").length}</div>
+            <p className="text-xs text-muted-foreground">High-value customers</p>
           </CardContent>
         </Card>
         <Card>
@@ -100,21 +180,43 @@ export default function CustomersPage() {
         <CardContent>
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search by name, email, or phone..." className="pl-10" />
+            <Input 
+              placeholder="Search by name, email, or phone..." 
+              className="pl-10" 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
         </CardContent>
       </Card>
+
+      {/* Bulk Actions Toolbar */}
+      <BulkActionsToolbar
+        selectedCount={selectedCustomers.length}
+        onClearSelection={() => setSelectedCustomers([])}
+        type="customers"
+        selectedIds={selectedCustomers}
+        onBulkAction={handleBulkAction}
+      />
 
       {/* Customers Table */}
       <Card>
         <CardHeader>
           <CardTitle>Customer List</CardTitle>
-          <CardDescription>{customers.length} customers in your database</CardDescription>
+          <CardDescription>{filteredCustomers.length} customers in your database</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={isAllSelected}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Select all customers"
+                    {...(isIndeterminate && { "data-state": "indeterminate" })}
+                  />
+                </TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Orders</TableHead>
@@ -125,8 +227,15 @@ export default function CustomersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {customers.map((customer) => (
+              {filteredCustomers.map((customer) => (
                 <TableRow key={customer.id}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedCustomers.includes(customer.id)}
+                      onCheckedChange={(checked) => handleSelectCustomer(customer.id, checked as boolean)}
+                      aria-label={`Select ${customer.name}`}
+                    />
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
@@ -160,19 +269,7 @@ export default function CustomersPage() {
                   <TableCell>ZMW {customer.totalSpent.toFixed(2)}</TableCell>
                   <TableCell>{new Date(customer.lastOrder).toLocaleDateString()}</TableCell>
                   <TableCell>
-                    <Badge variant={customer.status === "active" ? "default" : "secondary"}>{customer.status}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">
-                      View Details
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
+                    <Badge 
+                      variant={
+                        customer.status === "active" ? "default" : 
+                        customer.status ===
