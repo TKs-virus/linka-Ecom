@@ -8,11 +8,11 @@ WORKDIR /app
 
 # Configure pnpm for better network handling
 RUN pnpm config set registry https://registry.npmjs.org/ && \
-    pnpm config set network-timeout 300000 && \
-    pnpm config set fetch-retries 5 && \
-    pnpm config set fetch-retry-factor 2 && \
-    pnpm config set fetch-retry-mintimeout 10000 && \
-    pnpm config set fetch-retry-maxtimeout 60000
+   pnpm config set network-timeout 300000 && \
+   pnpm config set fetch-retries 5 && \
+   pnpm config set fetch-retry-factor 2 && \
+   pnpm config set fetch-retry-mintimeout 10000 && \
+   pnpm config set fetch-retry-maxtimeout 60000
 
 # Dependencies stage
 FROM base AS deps
@@ -47,7 +47,7 @@ ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
+   adduser -S nextjs -u 1001
 
 # Copy built application
 COPY --from=builder /app/public ./public
