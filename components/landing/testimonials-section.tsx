@@ -7,102 +7,99 @@ export function TestimonialsSection() {
     {
       name: "Sarah Johnson",
       role: "Local Business Owner",
-      avatar: "/placeholder-user.jpg",
+      company: "Artisan Bakery",
+      image: "/placeholder-user.jpg",
       rating: 5,
       content:
-        "Linka has transformed how I connect with customers. My sales have increased by 300% since joining the platform. The support team is amazing!",
-      business: "Sarah's Artisan Bakery",
+        "Linka has transformed how we connect with our community. Our online sales have increased by 300% since joining the platform.",
+      highlight: "300% increase in sales",
     },
     {
       name: "Michael Chen",
-      role: "Regular Customer",
-      avatar: "/placeholder-user.jpg",
+      role: "Customer",
+      company: "Regular Shopper",
+      image: "/placeholder-user.jpg",
       rating: 5,
       content:
-        "I love supporting local businesses through Linka. The delivery is super fast and I've discovered so many amazing products I never knew existed in my area.",
-      business: "Verified Customer",
+        "I love supporting local businesses through Linka. The delivery is fast, and I always discover amazing new products in my area.",
+      highlight: "Fast local delivery",
     },
     {
       name: "Emma Rodriguez",
       role: "Restaurant Owner",
-      avatar: "/placeholder-user.jpg",
+      company: "Bella Vista Cafe",
+      image: "/placeholder-user.jpg",
       rating: 5,
       content:
-        "The food delivery service has been a game-changer for our restaurant. We've reached customers we never could before, and the platform is so easy to use.",
-      business: "Emma's Kitchen",
+        "The food delivery platform is incredibly user-friendly. Our customers love the real-time tracking and easy ordering process.",
+      highlight: "User-friendly platform",
     },
     {
-      name: "David Thompson",
-      role: "Frequent Shopper",
-      avatar: "/placeholder-user.jpg",
-      rating: 5,
-      content:
-        "Shopping local has never been easier. The variety of products and services available on Linka is incredible. Plus, I feel good supporting my community.",
-      business: "Verified Customer",
-    },
-    {
-      name: "Lisa Park",
+      name: "David Park",
       role: "Healthcare Provider",
-      avatar: "/placeholder-user.jpg",
+      company: "Community Clinic",
+      image: "/placeholder-user.jpg",
       rating: 5,
       content:
-        "Linka's healthcare platform has helped us reach more patients and provide better service. The booking system is intuitive and our patients love the convenience.",
-      business: "Park Family Clinic",
-    },
-    {
-      name: "James Wilson",
-      role: "Course Instructor",
-      avatar: "/placeholder-user.jpg",
-      rating: 5,
-      content:
-        "Teaching through Linka's e-learning platform has allowed me to share my skills with the local community. The tools are professional and easy to use.",
-      business: "Wilson Photography School",
+        "Linka's healthcare platform has streamlined our appointment booking and made telemedicine accessible to all our patients.",
+      highlight: "Streamlined operations",
     },
   ]
 
   return (
-    <section className="py-20 bg-gradient-to-br from-blue-50 to-orange-50">
+    <section className="py-20 bg-gradient-to-br from-gray-50 to-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl mb-4">What Our Community Says</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-4">
+            What Our <span className="gradient-text-linka">Community</span> Says
+          </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Real stories from real people who are building stronger communities together
+            Real stories from local businesses and customers who are making a difference in their communities.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {testimonials.map((testimonial, index) => (
             <Card
               key={index}
-              className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white"
+              className="relative overflow-hidden border-gray-200/50 hover:border-brand-orange/30 transition-all duration-300 hover-lift bg-white/80 backdrop-blur-sm"
             >
               <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <Quote className="w-8 h-8 text-orange-500 mb-2" />
-                </div>
-
-                <div className="flex items-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-
-                <p className="text-gray-700 mb-6 leading-relaxed">"{testimonial.content}"</p>
-
-                <div className="flex items-center">
-                  <Avatar className="w-12 h-12 mr-4">
-                    <AvatarImage src={testimonial.avatar || "/placeholder.svg"} alt={testimonial.name} />
-                    <AvatarFallback>
+                <div className="flex items-start space-x-4 mb-4">
+                  <Avatar className="h-12 w-12 border-2 border-brand-orange/20">
+                    <AvatarImage src={testimonial.image || "/placeholder.svg"} alt={testimonial.name} />
+                    <AvatarFallback className="bg-brand-orange/10 text-brand-orange font-semibold">
                       {testimonial.name
                         .split(" ")
                         .map((n) => n[0])
                         .join("")}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                    <div className="text-sm text-gray-600">{testimonial.role}</div>
-                    <div className="text-xs text-orange-600 font-medium">{testimonial.business}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
+                        <p className="text-sm text-gray-600">{testimonial.role}</p>
+                        <p className="text-xs text-brand-blue font-medium">{testimonial.company}</p>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <Quote className="absolute -top-2 -left-2 h-8 w-8 text-brand-orange/20" />
+                  <blockquote className="text-gray-700 leading-relaxed pl-6">"{testimonial.content}"</blockquote>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-brand-orange/10 to-brand-blue/10 rounded-full px-3 py-1">
+                    <div className="w-2 h-2 bg-brand-orange rounded-full"></div>
+                    <span className="text-xs font-medium text-gray-700">{testimonial.highlight}</span>
                   </div>
                 </div>
               </CardContent>
@@ -111,21 +108,20 @@ export function TestimonialsSection() {
         </div>
 
         <div className="text-center mt-12">
-          <div className="inline-flex items-center space-x-2 bg-white rounded-full px-6 py-3 shadow-lg">
+          <div className="inline-flex items-center space-x-4 bg-white rounded-full px-6 py-3 shadow-sm border border-gray-200/50">
             <div className="flex -space-x-2">
-              {testimonials.slice(0, 4).map((testimonial, index) => (
-                <Avatar key={index} className="w-8 h-8 border-2 border-white">
-                  <AvatarImage src={testimonial.avatar || "/placeholder.svg"} alt={testimonial.name} />
-                  <AvatarFallback className="text-xs">
-                    {testimonial.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="w-8 h-8 rounded-full bg-gradient-to-r from-brand-orange to-brand-blue border-2 border-white flex items-center justify-center text-white text-xs font-bold"
+                >
+                  {i}
+                </div>
               ))}
             </div>
-            <span className="text-sm font-medium text-gray-700">Join 50,000+ happy customers</span>
+            <div className="text-sm text-gray-600">
+              <span className="font-semibold text-gray-900">4.9/5</span> from 10,000+ reviews
+            </div>
           </div>
         </div>
       </div>

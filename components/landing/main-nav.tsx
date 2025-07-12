@@ -3,45 +3,27 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import IndustriesDropdown from "@/components/IndustriesDropdown"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu, ShoppingCart, User, LogIn } from "lucide-react"
 
 const navigation = [
   { name: "Shop", href: "/shop" },
+  { name: "Industries", href: "/industries" },
   { name: "About", href: "/about" },
   { name: "For Retailers", href: "/retailers" },
   { name: "Contact", href: "/contact" },
 ]
 
-const industries = [
-  { name: "E-com", url: "http://localhost:3001" },
-  { name: "E-Learning", url: "http://localhost:3002" },
-  { name: "Entertainment & Streaming", url: "http://localhost:3003" },
-  { name: "Financial Services", url: "http://localhost:3004" },
-  { name: "Food Delivery", url: "http://localhost:3005" },
-  { name: "General Services", url: "http://localhost:3006" },
-  { name: "Healthcare", url: "http://localhost:3007" },
-  { name: "Home Services", url: "http://localhost:3008" },
-  { name: "Logistics & Delivery", url: "http://localhost:3009" },
-  { name: "Professional Services", url: "http://localhost:3010" },
-  { name: "Textile & Fabric", url: "http://localhost:3011" },
-  { name: "Travel & Tourism", url: "http://localhost:3012" },
-  { name: "Vehicle Store", url: "http://localhost:3013" },
-  { name: "Wholesale", url: "http://localhost:3014" },
-]
-
-
 export function MainNav() {
   const [isOpen, setIsOpen] = useState(false)
-  const isLoggedIn = false
+  const isLoggedIn = false // This would come from your auth context
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm">
       <div className="container mx-auto px-4 lg:px-6">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
+          {/* Logo - Left aligned */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-3 hover-lift">
               <div className="relative h-10 w-10">
@@ -51,7 +33,7 @@ export function MainNav() {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - Center aligned */}
           <nav className="hidden lg:flex items-center justify-center flex-1 mx-8">
             <div className="flex items-center space-x-8">
               {navigation.map((item) => (
@@ -64,33 +46,10 @@ export function MainNav() {
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 gradient-bg-linka transition-all duration-200 group-hover:w-full"></span>
                 </Link>
               ))}
-
-              {/* Industries Dropdown */}
-              <div className="relative group">
-                <button className="text-sm font-medium text-gray-700 hover:text-brand-orange transition-colors duration-200">
-                  Industries
-                </button>
-                <div className="absolute top-full left-0 hidden group-hover:block bg-white border rounded-md shadow-lg z-50 mt-2 w-64">
-                  <ul className="py-2">
-                    {industries.map((industry, idx) => (
-                      <li key={idx}>
-                        <a
-                          href={industry.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
-                        >
-                          {industry.name}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
             </div>
           </nav>
 
-          {/* Desktop Actions */}
+          {/* Desktop Actions - Right aligned */}
           <div className="hidden lg:flex items-center space-x-3">
             <Button variant="ghost" size="sm" className="hover:bg-brand-orange/10 hover:text-brand-orange" asChild>
               <Link href="/shop">
@@ -138,8 +97,6 @@ export function MainNav() {
                   <Image src="/linka-logo.png" alt="Linka Logo" width={32} height={32} className="object-contain" />
                   <span className="text-xl font-bold gradient-text-linka">Linka</span>
                 </div>
-
-                {/* Mobile Navigation */}
                 {navigation.map((item) => (
                   <Link
                     key={item.name}
@@ -150,28 +107,6 @@ export function MainNav() {
                     {item.name}
                   </Link>
                 ))}
-
-                {/* Mobile Industries Submenu */}
-                <div className="mt-2">
-                  <span className="text-lg font-medium text-gray-700">Industries</span>
-                  <ul className="ml-4 mt-2 space-y-2">
-                    {industries.map((industry, idx) => (
-                      <li key={idx}>
-                        <a
-                          href={industry.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-gray-600 hover:text-brand-orange"
-                          onClick={() => setIsOpen(false)}
-                        >
-                          {industry.name}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Mobile User Actions */}
                 <div className="border-t pt-6 space-y-3">
                   {isLoggedIn ? (
                     <div className="space-y-3">
