@@ -35,6 +35,8 @@ import {
   Bell,
   Settings,
   RefreshCw,
+  Home,
+  AlertCircle,
 } from "lucide-react"
 import {
   Line,
@@ -50,8 +52,9 @@ import {
   Legend,
   Area,
   AreaChart,
-  Pie, // Import Pie component
+  Pie,
 } from "recharts"
+import Link from "next/link"
 
 // Mock data for charts
 const revenueData = [
@@ -204,18 +207,21 @@ export default function RetailerDashboardDemo() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-emerald-500 rounded-2xl flex items-center justify-center animate-pulse">
-            <Sparkles className="w-8 h-8 text-white" />
+        <div className="text-center space-y-6">
+          <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-emerald-500 rounded-3xl flex items-center justify-center animate-pulse shadow-2xl">
+            <Sparkles className="w-10 h-10 text-white" />
           </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">
-              Loading Dashboard
+          <div className="space-y-3">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">
+              Loading LINKA Dashboard
             </h2>
-            <p className="text-slate-600">Preparing your business insights...</p>
+            <p className="text-slate-600 font-medium">Preparing your business insights...</p>
+            <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold animate-pulse">
+              ✨ DEMO MODE
+            </Badge>
           </div>
-          <div className="w-48 h-2 bg-slate-200 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full animate-pulse"></div>
+          <div className="w-64 h-3 bg-slate-200 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full animate-pulse w-3/4"></div>
           </div>
         </div>
       </div>
@@ -224,17 +230,34 @@ export default function RetailerDashboardDemo() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50">
+      {/* Demo Banner */}
+      <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 px-4">
+        <div className="flex items-center justify-center space-x-3 text-sm font-bold">
+          <Sparkles className="w-4 h-4 animate-pulse" />
+          <span>🎉 You're viewing the DEMO Dashboard - All data is simulated for demonstration</span>
+          <Button asChild size="sm" variant="ghost" className="text-white hover:bg-white/20 ml-4">
+            <Link href="/">
+              <Home className="w-4 h-4 mr-2" />
+              Back to Home
+            </Link>
+          </Button>
+        </div>
+      </div>
+
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-emerald-600 text-white shadow-xl">
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-emerald-600 text-white shadow-2xl">
         <div className="flex items-center justify-between p-6">
           <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30">
-                <Zap className="w-7 h-7 text-amber-300" />
+            <div className="flex items-center space-x-4">
+              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center border border-white/30 shadow-lg">
+                <Zap className="w-8 h-8 text-amber-300" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">LINKA</h1>
-                <p className="text-sm opacity-90 font-medium">Business Intelligence</p>
+                <h1 className="text-3xl font-bold">LINKA</h1>
+                <div className="flex items-center space-x-2">
+                  <p className="text-sm opacity-90 font-medium">Business Intelligence</p>
+                  <Badge className="bg-green-500 text-white text-xs font-bold animate-pulse">DEMO</Badge>
+                </div>
               </div>
             </div>
             <div className="hidden md:flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 flex-1 max-w-lg border border-white/20">
@@ -247,7 +270,7 @@ export default function RetailerDashboardDemo() {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="hidden lg:flex items-center space-x-2 text-sm font-medium">
+            <div className="hidden lg:flex items-center space-x-2 text-sm font-medium bg-white/10 px-3 py-2 rounded-lg">
               <Activity className="w-4 h-4" />
               <span>{currentTime.toLocaleTimeString()}</span>
             </div>
@@ -266,64 +289,139 @@ export default function RetailerDashboardDemo() {
         </div>
 
         <div className="flex">
-          {/* Sidebar */}
-          <div className="w-72 bg-white/95 backdrop-blur-sm border-r border-slate-200 min-h-screen shadow-lg">
-            <div className="p-6 space-y-3">
-              <Button
-                variant={activeTab === "overview" ? "default" : "ghost"}
-                className={`w-full justify-start font-semibold transition-all duration-200 ${
-                  activeTab === "overview"
-                    ? "bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-lg"
-                    : "text-slate-700 hover:bg-slate-100"
-                }`}
-                onClick={() => setActiveTab("overview")}
-              >
-                <BarChart3 className="w-5 h-5 mr-3" />
-                Dashboard
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-slate-700 hover:bg-slate-100 font-semibold">
-                <ShoppingCart className="w-5 h-5 mr-3" />
-                Orders
-                <Badge className="ml-auto bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold">23</Badge>
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-slate-700 hover:bg-slate-100 font-semibold">
-                <Package className="w-5 h-5 mr-3" />
-                Products
-                <Badge className="ml-auto bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold">5</Badge>
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-slate-700 hover:bg-slate-100 font-semibold">
-                <Users className="w-5 h-5 mr-3" />
-                Customers
-              </Button>
-              <Button
-                variant={activeTab === "analytics" ? "default" : "ghost"}
-                className={`w-full justify-start font-semibold transition-all duration-200 ${
-                  activeTab === "analytics"
-                    ? "bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-lg"
-                    : "text-slate-700 hover:bg-slate-100"
-                }`}
-                onClick={() => setActiveTab("analytics")}
-              >
-                <BarChart3 className="w-5 h-5 mr-3" />
-                Analytics
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-slate-700 hover:bg-slate-100 font-semibold">
-                <Megaphone className="w-5 h-5 mr-3" />
-                Marketing
-              </Button>
+          {/* Organized Sidebar */}
+          <div className="w-80 bg-white/95 backdrop-blur-sm border-r border-slate-200 min-h-screen shadow-xl">
+            <div className="p-6">
+              {/* Navigation Sections */}
+              <div className="space-y-6">
+                {/* Main Dashboard */}
+                <div>
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Dashboard</h3>
+                  <div className="space-y-2">
+                    <Button
+                      variant={activeTab === "overview" ? "default" : "ghost"}
+                      className={`w-full justify-start font-semibold transition-all duration-200 ${
+                        activeTab === "overview"
+                          ? "bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-lg"
+                          : "text-slate-700 hover:bg-slate-100"
+                      }`}
+                      onClick={() => setActiveTab("overview")}
+                    >
+                      <BarChart3 className="w-5 h-5 mr-3" />
+                      Overview
+                    </Button>
+                    <Button
+                      variant={activeTab === "analytics" ? "default" : "ghost"}
+                      className={`w-full justify-start font-semibold transition-all duration-200 ${
+                        activeTab === "analytics"
+                          ? "bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-lg"
+                          : "text-slate-700 hover:bg-slate-100"
+                      }`}
+                      onClick={() => setActiveTab("analytics")}
+                    >
+                      <TrendingUp className="w-5 h-5 mr-3" />
+                      Analytics
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Business Operations */}
+                <div>
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Operations</h3>
+                  <div className="space-y-2">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-slate-700 hover:bg-slate-100 font-semibold"
+                    >
+                      <ShoppingCart className="w-5 h-5 mr-3" />
+                      Orders
+                      <Badge className="ml-auto bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold">
+                        23
+                      </Badge>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-slate-700 hover:bg-slate-100 font-semibold"
+                    >
+                      <Package className="w-5 h-5 mr-3" />
+                      Products
+                      <Badge className="ml-auto bg-gradient-to-r from-red-400 to-red-500 text-white font-bold">5</Badge>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-slate-700 hover:bg-slate-100 font-semibold"
+                    >
+                      <Users className="w-5 h-5 mr-3" />
+                      Customers
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Reports & Marketing */}
+                <div>
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Growth</h3>
+                  <div className="space-y-2">
+                    <Button
+                      variant={activeTab === "reports" ? "default" : "ghost"}
+                      className={`w-full justify-start font-semibold transition-all duration-200 ${
+                        activeTab === "reports"
+                          ? "bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-lg"
+                          : "text-slate-700 hover:bg-slate-100"
+                      }`}
+                      onClick={() => setActiveTab("reports")}
+                    >
+                      <FileText className="w-5 h-5 mr-3" />
+                      Reports
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-slate-700 hover:bg-slate-100 font-semibold"
+                    >
+                      <Megaphone className="w-5 h-5 mr-3" />
+                      Marketing
+                    </Button>
+                    <Button
+                      variant={activeTab === "insights" ? "default" : "ghost"}
+                      className={`w-full justify-start font-semibold transition-all duration-200 ${
+                        activeTab === "insights"
+                          ? "bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-lg"
+                          : "text-slate-700 hover:bg-slate-100"
+                      }`}
+                      onClick={() => setActiveTab("insights")}
+                    >
+                      <Target className="w-5 h-5 mr-3" />
+                      Insights
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Demo Info Card */}
+              <div className="mt-8 p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-200">
+                <div className="flex items-center space-x-3 mb-3">
+                  <AlertCircle className="w-5 h-5 text-blue-600" />
+                  <h4 className="font-bold text-blue-900">Demo Mode</h4>
+                </div>
+                <p className="text-sm text-blue-700 mb-3">
+                  You're exploring our full-featured dashboard with sample data. All features are functional!
+                </p>
+                <Button asChild size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  <Link href="/login">Get Started</Link>
+                </Button>
+              </div>
             </div>
 
             {/* User Profile */}
             <div className="absolute bottom-6 left-6 right-6">
               <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-slate-100 to-blue-50 rounded-xl border border-slate-200 shadow-sm">
-                <Avatar className="w-10 h-10 ring-2 ring-blue-200">
+                <Avatar className="w-12 h-12 ring-2 ring-blue-200">
                   <AvatarImage src="/placeholder-user.jpg" />
                   <AvatarFallback className="bg-gradient-to-r from-blue-500 to-emerald-500 text-white font-bold">
-                    JD
+                    DEMO
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-slate-800">John Doe</p>
+                  <p className="text-sm font-bold text-slate-800">Demo User</p>
                   <p className="text-xs text-slate-600 font-medium">Administrator</p>
                 </div>
                 <Button variant="ghost" size="icon" className="text-slate-600 hover:bg-slate-200">
@@ -336,13 +434,18 @@ export default function RetailerDashboardDemo() {
           {/* Main Content */}
           <div className="flex-1 p-8">
             <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                    Dashboard Overview
-                  </h1>
-                  <p className="text-slate-600 font-medium mt-2">
-                    Welcome back! Here's your business performance at a glance.
+                  <div className="flex items-center space-x-3 mb-2">
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                      Dashboard Overview
+                    </h1>
+                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold animate-pulse">
+                      LIVE DEMO
+                    </Badge>
+                  </div>
+                  <p className="text-slate-600 font-medium">
+                    Welcome to your business intelligence center. Here's your performance at a glance.
                   </p>
                 </div>
                 <div className="flex items-center space-x-3">
@@ -390,7 +493,7 @@ export default function RetailerDashboardDemo() {
               </TabsList>
 
               <TabsContent value="overview" className="space-y-8">
-                {/* Key Metrics */}
+                {/* Key Metrics - Better organized */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                     <CardContent className="p-6">
@@ -480,7 +583,7 @@ export default function RetailerDashboardDemo() {
                   </Card>
                 </div>
 
-                {/* Charts Section */}
+                {/* Charts Section - Better organized */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Revenue Analytics */}
                   <Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-xl">
@@ -610,7 +713,7 @@ export default function RetailerDashboardDemo() {
                   </Card>
                 </div>
 
-                {/* Recent Orders and Top Products */}
+                {/* Recent Orders and Top Products - Better organized */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Recent Orders */}
                   <Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-xl">
@@ -898,6 +1001,46 @@ export default function RetailerDashboardDemo() {
                           <Users className="w-4 h-4 mr-2" />
                           Learn More
                         </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Demo Information */}
+                  <div className="space-y-6">
+                    <h3 className="text-2xl font-bold flex items-center text-slate-800">
+                      <Sparkles className="w-6 h-6 mr-3 text-purple-600" />
+                      Demo Features
+                    </h3>
+
+                    <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 shadow-lg">
+                      <CardContent className="p-6">
+                        <h4 className="text-xl font-bold mb-3 text-purple-900">What You're Seeing</h4>
+                        <div className="space-y-3 text-purple-700">
+                          <p className="font-medium">✨ Real-time analytics with sample business data</p>
+                          <p className="font-medium">📊 Interactive charts and performance metrics</p>
+                          <p className="font-medium">🎯 AI-powered business insights and recommendations</p>
+                          <p className="font-medium">📈 Complete dashboard functionality</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg">
+                      <CardContent className="p-6">
+                        <h4 className="text-xl font-bold mb-3 text-blue-900">Ready to Get Started?</h4>
+                        <p className="text-blue-700 font-medium mb-4">
+                          Experience the full power of LINKA's business management platform with your own data.
+                        </p>
+                        <div className="space-y-3">
+                          <Button
+                            asChild
+                            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold"
+                          >
+                            <Link href="/signup">Create Your Account</Link>
+                          </Button>
+                          <Button asChild variant="outline" className="w-full bg-transparent">
+                            <Link href="/contact">Contact Sales</Link>
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   </div>
