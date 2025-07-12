@@ -14,18 +14,27 @@ import {
   ShoppingCart,
   Package,
   Users,
+  TrendingUp,
   Download,
   Plus,
   Search,
   Calendar,
   Filter,
   Eye,
+  Target,
+  BookOpen,
   BarChart3,
+  FileText,
+  UserCheck,
+  Boxes,
+  Sparkles,
   Bell,
   Settings,
   ChevronRight,
 } from "lucide-react"
 import {
+  BarChart,
+  Bar,
   PieChart,
   Cell,
   XAxis,
@@ -189,7 +198,7 @@ export default function RetailerDashboardDemo() {
   return (
     <div className="min-h-screen bg-slate-50">
       <AppSidebar />
-      
+
       {/* Main Content with Sidebar Offset */}
       <div className="ml-80">
         {/* Modern Header */}
@@ -471,4 +480,273 @@ export default function RetailerDashboardDemo() {
                             <Avatar className="w-10 h-10">
                               <AvatarFallback className="bg-sky-100 text-sky-700 font-bold text-sm">
                                 {order.avatar}
-                              \
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-bold text-slate-800 text-sm">{order.customer}</p>
+                              <p className="text-xs text-slate-600">
+                                {order.id} • {order.items} items
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-slate-800">ZMW {order.amount}</p>
+                            <Badge className={`text-xs ${order.statusColor}`}>{order.status}</Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Top Products */}
+                <Card className="bg-white border-slate-200 shadow-sm">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xl font-bold text-slate-800">Top Products</CardTitle>
+                      <CardDescription className="text-slate-600">Best performing items</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="sm" className="text-slate-600 hover:bg-slate-100">
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      View All
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {topProducts.map((product, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
+                        >
+                          <div className="flex items-center space-x-4">
+                            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-slate-200">
+                              <span className="text-lg">{product.rank}</span>
+                            </div>
+                            <div>
+                              <p className="font-bold text-slate-800 text-sm">{product.name}</p>
+                              <p className="text-xs text-slate-600">
+                                {product.category} • {product.sales} sales
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-slate-800 text-sm">ZMW {product.revenue.toLocaleString()}</p>
+                            <p className={`text-xs font-bold ${product.growthColor}`}>{product.growth}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <Card className="bg-white border-slate-200 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-bold text-slate-800">Performance Metrics</CardTitle>
+                    <CardDescription className="text-slate-600">Detailed analytics overview</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={performanceData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                        <XAxis dataKey="month" stroke="#64748B" fontSize={12} />
+                        <YAxis stroke="#64748B" fontSize={12} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "white",
+                            border: "1px solid #E2E8F0",
+                            borderRadius: "8px",
+                            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                          }}
+                        />
+                        <Bar dataKey="orders" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="customers" fill="#10B981" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white border-slate-200 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-bold text-slate-800">Growth Trends</CardTitle>
+                    <CardDescription className="text-slate-600">Month-over-month comparison</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-xl">
+                        <div className="flex items-center space-x-3">
+                          <Target className="w-8 h-8 text-emerald-600" />
+                          <div>
+                            <p className="font-bold text-emerald-800">Revenue Growth</p>
+                            <p className="text-sm text-emerald-600">vs last month</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-emerald-800">+28.4%</p>
+                          <p className="text-sm text-emerald-600">ZMW 48,000</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-blue-50 rounded-xl">
+                        <div className="flex items-center space-x-3">
+                          <UserCheck className="w-8 h-8 text-blue-600" />
+                          <div>
+                            <p className="font-bold text-blue-800">Customer Growth</p>
+                            <p className="text-sm text-blue-600">New acquisitions</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-blue-800">+12.8%</p>
+                          <p className="text-sm text-blue-600">1,421 new</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-purple-50 rounded-xl">
+                        <div className="flex items-center space-x-3">
+                          <Boxes className="w-8 h-8 text-purple-600" />
+                          <div>
+                            <p className="font-bold text-purple-800">Product Performance</p>
+                            <p className="text-sm text-purple-600">Sales velocity</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-purple-800">+15.2%</p>
+                          <p className="text-sm text-purple-600">Higher turnover</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="reports" className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-4 mb-4">
+                      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <FileText className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-800">Sales Report</h3>
+                        <p className="text-sm text-slate-600">Monthly sales analysis</p>
+                      </div>
+                    </div>
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download PDF
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-4 mb-4">
+                      <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                        <BarChart3 className="w-6 h-6 text-emerald-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-800">Analytics Report</h3>
+                        <p className="text-sm text-slate-600">Performance metrics</p>
+                      </div>
+                    </div>
+                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download PDF
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-4 mb-4">
+                      <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <Users className="w-6 h-6 text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-800">Customer Report</h3>
+                        <p className="text-sm text-slate-600">Customer insights</p>
+                      </div>
+                    </div>
+                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download PDF
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="insights" className="space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <Card className="bg-gradient-to-br from-sky-50 to-sky-100 border-sky-200 shadow-sm">
+                  <CardHeader>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center">
+                        <Sparkles className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl font-bold text-sky-900">AI Insights</CardTitle>
+                        <CardDescription className="text-sky-700">Powered by machine learning</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="bg-white/50 rounded-xl p-4">
+                      <h4 className="font-bold text-sky-900 mb-2">Revenue Prediction</h4>
+                      <p className="text-sm text-sky-800">
+                        Based on current trends, you're projected to reach <strong>ZMW 1.4M</strong> in revenue next
+                        month (+26% growth).
+                      </p>
+                    </div>
+                    <div className="bg-white/50 rounded-xl p-4">
+                      <h4 className="font-bold text-sky-900 mb-2">Inventory Alert</h4>
+                      <p className="text-sm text-sky-800">
+                        <strong>12 products</strong> are running low on stock. Consider restocking to avoid missed sales
+                        opportunities.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 shadow-sm">
+                  <CardHeader>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
+                        <BookOpen className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl font-bold text-emerald-900">Recommendations</CardTitle>
+                        <CardDescription className="text-emerald-700">Actionable business advice</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="bg-white/50 rounded-xl p-4">
+                      <h4 className="font-bold text-emerald-900 mb-2">Marketing Opportunity</h4>
+                      <p className="text-sm text-emerald-800">
+                        Electronics category shows <strong>+18% growth</strong>. Consider increasing marketing spend in
+                        this segment.
+                      </p>
+                    </div>
+                    <div className="bg-white/50 rounded-xl p-4">
+                      <h4 className="font-bold text-emerald-900 mb-2">Customer Retention</h4>
+                      <p className="text-sm text-emerald-800">
+                        Implement a loyalty program to increase repeat purchases by an estimated <strong>15-20%</strong>
+                        .
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </div>
+  )
+}
