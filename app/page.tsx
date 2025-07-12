@@ -7,20 +7,18 @@ import { DeliveryPartnerSection } from "@/components/landing/delivery-partner-se
 import { AppFooter } from "@/components/landing/app-footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import {
   BarChart3,
-  Play,
   ArrowRight,
   DollarSign,
   ShoppingCart,
   Package,
   Users,
   TrendingUp,
-  Sparkles,
   Eye,
-  Zap,
+  Shield,
+  Clock,
 } from "lucide-react"
 
 export default function HomePage() {
@@ -28,55 +26,33 @@ export default function HomePage() {
     <div className="min-h-screen bg-white">
       <MainNav />
 
-      {/* Demo Banner */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white py-3">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center space-x-3">
-            <Sparkles className="w-5 h-5 text-yellow-300 animate-pulse" />
-            <span className="font-bold">🎉 Try our FREE Business Dashboard Demo - No signup required!</span>
-            <Button asChild size="sm" className="bg-white text-blue-600 hover:bg-blue-50 font-bold ml-4">
-              <Link href="/dashboard">
-                <Play className="w-4 h-4 mr-2" />
-                Launch Demo
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-
       <HeroSection />
 
-      {/* Demo Dashboard Showcase */}
+      {/* Business Dashboard Showcase */}
       <section className="py-20 bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-lg px-6 py-2 mb-6">
-              <Zap className="w-5 h-5 mr-2" />
-              LIVE DEMO AVAILABLE
-            </Badge>
             <h2 className="text-4xl font-bold text-slate-800 mb-4">
-              Experience Our{" "}
+              Powerful{" "}
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Business Dashboard
+                Business Intelligence
               </span>
             </h2>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
-              See real business analytics, inventory management, and customer insights in action. No registration
-              required - start exploring immediately!
+              Comprehensive analytics, inventory management, and customer insights designed for modern businesses.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Demo Preview */}
+            {/* Dashboard Preview */}
             <div className="relative">
-              <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-2xl border border-blue-200 overflow-hidden">
+              <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white">
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                       <BarChart3 className="w-5 h-5" />
                     </div>
                     <span className="font-bold">LINKA Business Dashboard</span>
-                    <Badge className="bg-green-500 text-white font-bold animate-pulse">LIVE</Badge>
                   </div>
                 </div>
 
@@ -134,62 +110,69 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-
-              {/* Floating Demo Badge */}
-              <div className="absolute -top-4 -right-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-full shadow-lg animate-bounce">
-                <span className="font-bold text-sm">✨ LIVE DEMO</span>
-              </div>
             </div>
 
-            {/* Demo Access */}
+            {/* Features */}
             <div className="space-y-8">
               <div>
-                <h3 className="text-3xl font-bold text-slate-800 mb-4">Ready to Explore?</h3>
+                <h3 className="text-3xl font-bold text-slate-800 mb-4">Complete Business Solution</h3>
                 <p className="text-lg text-slate-600 mb-6">
-                  Get instant access to our full-featured business dashboard. See real analytics, manage inventory,
-                  track orders, and analyze customer data - all with sample data that demonstrates the platform's
-                  capabilities.
+                  Everything you need to manage and grow your business, from analytics to customer management.
                 </p>
               </div>
 
               <div className="grid gap-4">
-                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg">
+                <Card className="bg-white border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300">
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
                         <Eye className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-blue-900">Full Dashboard Access</h4>
-                        <p className="text-blue-700 text-sm">Complete analytics and management tools</p>
+                        <h4 className="font-bold text-slate-900">Real-time Analytics</h4>
+                        <p className="text-slate-600 text-sm">Live business insights and performance metrics</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 shadow-lg">
+                <Card className="bg-white border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300">
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
                         <TrendingUp className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-emerald-900">Real Business Data</h4>
-                        <p className="text-emerald-700 text-sm">Sample data showing real scenarios</p>
+                        <h4 className="font-bold text-slate-900">Growth Tracking</h4>
+                        <p className="text-slate-600 text-sm">Monitor trends and identify opportunities</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 shadow-lg">
+                <Card className="bg-white border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300">
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                        <Sparkles className="w-6 h-6 text-white" />
+                        <Shield className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-purple-900">No Registration</h4>
-                        <p className="text-purple-700 text-sm">Instant access, no signup required</p>
+                        <h4 className="font-bold text-slate-900">Secure & Reliable</h4>
+                        <p className="text-slate-600 text-sm">Enterprise-grade security and uptime</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
+                        <Clock className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">Quick Setup</h4>
+                        <p className="text-slate-600 text-sm">Get started in minutes, not hours</p>
                       </div>
                     </div>
                   </CardContent>
@@ -203,14 +186,14 @@ export default function HomePage() {
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold shadow-xl text-lg py-6"
                 >
                   <Link href="/dashboard">
-                    <Play className="w-6 h-6 mr-3" />
-                    Launch Demo Dashboard
+                    <BarChart3 className="w-6 h-6 mr-3" />
+                    Explore Dashboard
                     <ArrowRight className="w-6 h-6 ml-3" />
                   </Link>
                 </Button>
 
                 <p className="text-center text-sm text-slate-500">
-                  ⚡ Loads instantly • 🔒 No personal info needed • 📊 Full features available
+                  Full-featured demo • No registration required • Instant access
                 </p>
               </div>
             </div>
