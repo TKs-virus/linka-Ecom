@@ -1,37 +1,66 @@
-"use client"
-
-import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { ArrowRight, Store, TrendingUp, Users } from "lucide-react"
 
-/**
- * Call-to-action section encouraging retailers to join Linka.
- * Exported as `RetailerCtaSection` to satisfy the deployment check.
- */
 export function RetailerCtaSection() {
+  const benefits = [
+    {
+      icon: Store,
+      title: "Easy Setup",
+      description: "Get your online store running in minutes with our intuitive setup process.",
+    },
+    {
+      icon: TrendingUp,
+      title: "Boost Sales",
+      description: "Reach more customers and increase revenue with our marketing tools.",
+    },
+    {
+      icon: Users,
+      title: "Customer Insights",
+      description: "Understand your customers better with detailed analytics and reports.",
+    },
+  ]
+
   return (
-    <section id="retailer-cta" className="mx-auto max-w-6xl px-6 py-20 md:px-10 lg:py-28">
-      <Card className="flex flex-col items-center gap-8 rounded-2xl bg-gradient-to-br from-[#E67E22]/10 to-[#2E86AB]/10 p-10 text-center shadow-lg md:flex-row md:text-left">
-        <CardHeader className="flex-shrink-0">
-          <Image src="/linka-logo.png" alt="Linka brand logo" width={120} height={120} priority />
-        </CardHeader>
-
-        <CardContent className="space-y-4">
-          <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Become a Linka Retail Partner
-          </h2>
-          <p className="text-muted-foreground">
-            Access a new audience, boost your sales, and get real-time insights with our analytics dashboard. Join
-            hundreds of successful retailers already growing with Linka.
+    <section className="py-20 bg-gray-50">
+      <div className="container">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Ready to Grow Your Business?</h2>
+          <p className="mt-4 text-lg text-gray-600">
+            Join thousands of retailers who trust Linka to power their online presence and connect with local customers.
           </p>
-        </CardContent>
+        </div>
 
-        <CardFooter className="mt-4 md:mt-0">
-          <Button size="lg" className="bg-[#E67E22] text-white hover:bg-[#d66f1e]">
-            Get Started
-          </Button>
-        </CardFooter>
-      </Card>
+        <div className="mt-16 grid gap-8 md:grid-cols-3">
+          {benefits.map((benefit) => (
+            <Card key={benefit.title} className="text-center">
+              <CardContent className="pt-6">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100">
+                  <benefit.icon className="h-6 w-6 text-orange-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">{benefit.title}</h3>
+                <p className="mt-2 text-gray-600">{benefit.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="mt-16 text-center">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button size="lg" className="text-lg px-8 py-6" asChild>
+              <Link href="/signup">
+                Start Selling Today
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            <Button variant="outline" size="lg" className="text-lg px-8 py-6 bg-transparent" asChild>
+              <Link href="/dashboard">Guest Login</Link>
+            </Button>
+          </div>
+          <p className="mt-4 text-sm text-gray-500">No credit card required • Free 30-day trial • Cancel anytime</p>
+        </div>
+      </div>
     </section>
   )
 }
