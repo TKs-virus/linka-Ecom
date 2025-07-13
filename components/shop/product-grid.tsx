@@ -1,151 +1,187 @@
 "use client"
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Star, ShoppingCart, Heart, MapPin } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Star, ShoppingCart, Heart, Eye } from "lucide-react"
+import { getProducts, type Product } from "@/app/actions/product-actions"
 import Image from "next/image"
-import type { Product } from "@/app/actions/product-actions"
 
 interface ProductGridProps {
-  products: Product[]
-  viewMode?: "grid" | "list"
+  filters?: {
+    category?: string
+    search?: string
+    minPrice?: number
+    maxPrice?: number
+    featured?: boolean
+  }
 }
 
-export function ProductGrid({ products, viewMode = "grid" }: ProductGridProps) {
-  if (products.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-          <ShoppingCart className="w-12 h-12 text-gray-400" />
-        </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
-        <p className="text-gray-500">Try adjusting your search or filter criteria</p>
-      </div>
-    )
-  }
+export function ProductGrid({ filters }: ProductGridProps) {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  if (viewMode === "list") {
+  useEffect(() => {
+    async function fetchProducts() {
+      setLoading(true)
+      setError(null)
+
+      try {
+        const result = await getProducts(filters)
+
+        if (result.success) {
+          setProducts(result.data)
+        } else {
+          setError(result.error || "Failed to load products")
+        }
+      } catch (err) {
+        setError("An unexpected error occurred")
+        console.error("Error fetching products:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProducts()
+  }, [filters])
+
+  if (loading) {
     return (
-      <div className="space-y-4">
-        {products.map((product) => (
-          <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-            <div className="flex">
-              <div className="relative w-48 h-32 flex-shrink-0">
-                <Image
-                  src={product.image_url || "/placeholder.svg?height=128&width=192"}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="absolute top-2 right-2 h-8 w-8 p-0 bg-white/80 hover:bg-white"
-                >
-                  <Heart className="h-4 w-4" />
-                </Button>
-              </div>
-              <CardContent className="flex-1 p-6">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="font-semibold text-lg text-gray-900 mb-1">{product.name}</h3>
-                    <p className="text-gray-600 text-sm mb-2 line-clamp-2">{product.description}</p>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {product.category}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">
-                        {product.type}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        <span>{product.retailer_name}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span>4.5</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-gray-900 mb-2">K{product.price.toFixed(2)}</div>
-                    <Button className="w-full">
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Add to Cart
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <Card key={index} className="overflow-hidden">
+            <div className="aspect-square">
+              <Skeleton className="w-full h-full" />
             </div>
+            <CardContent className="p-4 space-y-2">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-2/3" />
+              <div className="flex items-center space-x-2">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-12" />
+              </div>
+            </CardContent>
+            <CardFooter className="p-4 pt-0">
+              <Skeleton className="h-10 w-full" />
+            </CardFooter>
           </Card>
         ))}
       </div>
     )
   }
 
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+          <Eye className="w-8 h-8 text-red-600" />
+        </div>
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">Unable to load products</h3>
+        <p className="text-slate-600 mb-4">{error}</p>
+        <Button onClick={() => window.location.reload()} variant="outline">
+          Try Again
+        </Button>
+      </div>
+    )
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+          <ShoppingCart className="w-8 h-8 text-slate-400" />
+        </div>
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">No products found</h3>
+        <p className="text-slate-600">Try adjusting your search or filter criteria</p>
+      </div>
+    )
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {products.map((product) => (
         <Card
           key={product.id}
-          className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-slate-200"
         >
-          <div className="relative aspect-square overflow-hidden">
+          <div className="relative aspect-square overflow-hidden bg-slate-50">
             <Image
-              src={product.image_url || "/placeholder.svg?height=300&width=300"}
+              src={product.image || "/placeholder.svg"}
               alt={product.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-            <Button
-              size="sm"
-              variant="ghost"
-              className="absolute top-3 right-3 h-9 w-9 p-0 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            >
-              <Heart className="h-4 w-4" />
-            </Button>
-            <div className="absolute top-3 left-3 flex flex-col gap-2">
-              <Badge variant="secondary" className="bg-white/90 text-gray-800">
+            {product.featured && (
+              <Badge className="absolute top-3 left-3 bg-blue-600 hover:bg-blue-700">Featured</Badge>
+            )}
+            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <Button size="icon" variant="secondary" className="h-8 w-8 bg-white/90 hover:bg-white">
+                <Heart className="h-4 w-4" />
+              </Button>
+            </div>
+            {product.stock <= 10 && product.stock > 0 && (
+              <Badge variant="destructive" className="absolute bottom-3 left-3">
+                Only {product.stock} left
+              </Badge>
+            )}
+            {product.stock === 0 && (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <Badge variant="destructive" className="text-white">
+                  Out of Stock
+                </Badge>
+              </div>
+            )}
+          </div>
+
+          <CardContent className="p-4 space-y-3">
+            <div>
+              <h3 className="font-semibold text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                {product.name}
+              </h3>
+              <p className="text-sm text-slate-600 line-clamp-2 mt-1">{product.description}</p>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <Star
+                    key={index}
+                    className={`h-4 w-4 ${
+                      index < Math.floor(product.rating) ? "text-yellow-400 fill-yellow-400" : "text-slate-300"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-sm text-slate-600">
+                {product.rating} ({product.reviews})
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-2xl font-bold text-slate-900">K{product.price.toFixed(2)}</span>
+              </div>
+              <Badge variant="secondary" className="text-xs">
                 {product.category}
               </Badge>
-              {product.type === "service" && (
-                <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
-                  Service
-                </Badge>
-              )}
-            </div>
-          </div>
-          <CardContent className="p-6">
-            <div className="space-y-3">
-              <div>
-                <h3 className="font-semibold text-lg text-gray-900 mb-1 line-clamp-1">{product.name}</h3>
-                <p className="text-gray-600 text-sm line-clamp-2 mb-2">{product.description}</p>
-              </div>
-
-              <div className="flex items-center justify-between text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  <span className="truncate">{product.retailer_name}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                  <span>4.5</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-2">
-                <div className="text-2xl font-bold text-gray-900">K{product.price.toFixed(2)}</div>
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                  <ShoppingCart className="w-4 h-4 mr-2" />
-                  Add to Cart
-                </Button>
-              </div>
             </div>
           </CardContent>
+
+          <CardFooter className="p-4 pt-0">
+            <Button
+              className="w-full"
+              disabled={product.stock === 0}
+              variant={product.stock === 0 ? "secondary" : "default"}
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+            </Button>
+          </CardFooter>
         </Card>
       ))}
     </div>

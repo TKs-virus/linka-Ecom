@@ -1,139 +1,224 @@
 "use server"
 
-import { createServerClient } from "@/lib/supabase/server"
-
 export interface Product {
   id: string
   name: string
   description: string
   price: number
   category: string
-  image_url?: string
-  retailer_id: string
-  retailer_name?: string
-  stock_quantity: number
-  is_active: boolean
-  type: "product" | "service"
-  created_at: string
-  updated_at: string
+  image: string
+  stock: number
+  rating: number
+  reviews: number
+  featured: boolean
+  tags: string[]
 }
 
-export interface ProductFilters {
+// Mock product data - replace with actual database calls
+const mockProducts: Product[] = [
+  {
+    id: "1",
+    name: "Premium Wireless Headphones",
+    description: "High-quality wireless headphones with noise cancellation and premium sound quality.",
+    price: 299.99,
+    category: "Electronics",
+    image: "/placeholder.svg?height=300&width=300&text=Headphones",
+    stock: 45,
+    rating: 4.8,
+    reviews: 234,
+    featured: true,
+    tags: ["wireless", "audio", "premium"],
+  },
+  {
+    id: "2",
+    name: "Smart Fitness Watch",
+    description: "Advanced fitness tracking with heart rate monitoring and GPS functionality.",
+    price: 199.99,
+    category: "Electronics",
+    image: "/placeholder.svg?height=300&width=300&text=Watch",
+    stock: 32,
+    rating: 4.6,
+    reviews: 189,
+    featured: true,
+    tags: ["fitness", "smart", "health"],
+  },
+  {
+    id: "3",
+    name: "Ergonomic Office Chair",
+    description: "Comfortable office chair with lumbar support and adjustable height.",
+    price: 449.99,
+    category: "Furniture",
+    image: "/placeholder.svg?height=300&width=300&text=Chair",
+    stock: 18,
+    rating: 4.7,
+    reviews: 156,
+    featured: false,
+    tags: ["office", "ergonomic", "furniture"],
+  },
+  {
+    id: "4",
+    name: "Professional Camera Lens",
+    description: "85mm f/1.4 portrait lens for professional photography.",
+    price: 899.99,
+    category: "Photography",
+    image: "/placeholder.svg?height=300&width=300&text=Lens",
+    stock: 12,
+    rating: 4.9,
+    reviews: 87,
+    featured: true,
+    tags: ["photography", "lens", "professional"],
+  },
+  {
+    id: "5",
+    name: "Organic Coffee Beans",
+    description: "Premium organic coffee beans sourced from sustainable farms.",
+    price: 24.99,
+    category: "Food & Beverage",
+    image: "/placeholder.svg?height=300&width=300&text=Coffee",
+    stock: 156,
+    rating: 4.5,
+    reviews: 312,
+    featured: false,
+    tags: ["organic", "coffee", "premium"],
+  },
+  {
+    id: "6",
+    name: "Wireless Charging Pad",
+    description: "Fast wireless charging pad compatible with all Qi-enabled devices.",
+    price: 39.99,
+    category: "Electronics",
+    image: "/placeholder.svg?height=300&width=300&text=Charger",
+    stock: 89,
+    rating: 4.3,
+    reviews: 203,
+    featured: false,
+    tags: ["wireless", "charging", "tech"],
+  },
+]
+
+export async function getProducts(filters?: {
   category?: string
   search?: string
   minPrice?: number
   maxPrice?: number
-  type?: "product" | "service" | "all"
-  retailerId?: string
-}
-
-export async function getProducts(filters: ProductFilters = {}): Promise<Product[]> {
+  featured?: boolean
+}) {
   try {
-    const supabase = createServerClient()
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 100))
 
-    let query = supabase
-      .from("products")
-      .select(`
-        *,
-        retailers!inner(
-          business_name
-        )
-      `)
-      .eq("is_active", true)
+    let filteredProducts = [...mockProducts]
 
-    // Apply filters
-    if (filters.category) {
-      query = query.eq("category", filters.category)
+    if (filters?.category && filters.category !== "all") {
+      filteredProducts = filteredProducts.filter(
+        (product) => product.category.toLowerCase() === filters.category?.toLowerCase(),
+      )
     }
 
-    if (filters.search) {
-      query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
+    if (filters?.search) {
+      const searchTerm = filters.search.toLowerCase()
+      filteredProducts = filteredProducts.filter(
+        (product) =>
+          product.name.toLowerCase().includes(searchTerm) ||
+          product.description.toLowerCase().includes(searchTerm) ||
+          product.tags.some((tag) => tag.toLowerCase().includes(searchTerm)),
+      )
     }
 
-    if (filters.minPrice) {
-      query = query.gte("price", filters.minPrice)
+    if (filters?.minPrice !== undefined) {
+      filteredProducts = filteredProducts.filter((product) => product.price >= filters.minPrice!)
     }
 
-    if (filters.maxPrice) {
-      query = query.lte("price", filters.maxPrice)
+    if (filters?.maxPrice !== undefined) {
+      filteredProducts = filteredProducts.filter((product) => product.price <= filters.maxPrice!)
     }
 
-    if (filters.type && filters.type !== "all") {
-      query = query.eq("type", filters.type)
-    }
-
-    if (filters.retailerId) {
-      query = query.eq("retailer_id", filters.retailerId)
-    }
-
-    const { data, error } = await query.order("created_at", { ascending: false })
-
-    if (error) {
-      console.error("Error fetching products:", error)
-      return []
-    }
-
-    // Transform the data to include retailer name
-    const products =
-      data?.map((item: any) => ({
-        ...item,
-        retailer_name: item.retailers?.business_name || "Unknown Retailer",
-      })) || []
-
-    return products
-  } catch (error) {
-    console.error("Error in getProducts:", error)
-    return []
-  }
-}
-
-export async function getProductById(id: string): Promise<Product | null> {
-  try {
-    const supabase = createServerClient()
-
-    const { data, error } = await supabase
-      .from("products")
-      .select(`
-        *,
-        retailers!inner(
-          business_name
-        )
-      `)
-      .eq("id", id)
-      .eq("is_active", true)
-      .single()
-
-    if (error) {
-      console.error("Error fetching product:", error)
-      return null
+    if (filters?.featured) {
+      filteredProducts = filteredProducts.filter((product) => product.featured)
     }
 
     return {
-      ...data,
-      retailer_name: data.retailers?.business_name || "Unknown Retailer",
+      success: true,
+      data: filteredProducts,
+      total: filteredProducts.length,
     }
   } catch (error) {
-    console.error("Error in getProductById:", error)
-    return null
+    console.error("Error fetching products:", error)
+    return {
+      success: false,
+      data: [],
+      total: 0,
+      error: "Failed to fetch products",
+    }
   }
 }
 
-export async function getProductCategories(): Promise<string[]> {
+export async function getProductById(id: string) {
   try {
-    const supabase = createServerClient()
+    await new Promise((resolve) => setTimeout(resolve, 100))
 
-    const { data, error } = await supabase.from("products").select("category").eq("is_active", true)
+    const product = mockProducts.find((p) => p.id === id)
 
-    if (error) {
-      console.error("Error fetching categories:", error)
-      return []
+    if (!product) {
+      return {
+        success: false,
+        data: null,
+        error: "Product not found",
+      }
     }
 
-    // Get unique categories
-    const categories = [...new Set(data?.map((item) => item.category).filter(Boolean))] || []
-    return categories
+    return {
+      success: true,
+      data: product,
+    }
   } catch (error) {
-    console.error("Error in getProductCategories:", error)
-    return []
+    console.error("Error fetching product:", error)
+    return {
+      success: false,
+      data: null,
+      error: "Failed to fetch product",
+    }
+  }
+}
+
+export async function getFeaturedProducts() {
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    const featuredProducts = mockProducts.filter((product) => product.featured)
+
+    return {
+      success: true,
+      data: featuredProducts,
+      total: featuredProducts.length,
+    }
+  } catch (error) {
+    console.error("Error fetching featured products:", error)
+    return {
+      success: false,
+      data: [],
+      total: 0,
+      error: "Failed to fetch featured products",
+    }
+  }
+}
+
+export async function getCategories() {
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    const categories = Array.from(new Set(mockProducts.map((product) => product.category)))
+
+    return {
+      success: true,
+      data: categories,
+    }
+  } catch (error) {
+    console.error("Error fetching categories:", error)
+    return {
+      success: false,
+      data: [],
+      error: "Failed to fetch categories",
+    }
   }
 }

@@ -2,64 +2,67 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, X } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
 
-export function SearchBar() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "")
+interface SearchBarProps {
+  onSearch: (query: string) => void
+  placeholder?: string
+  initialValue?: string
+}
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    const params = new URLSearchParams(searchParams.toString())
+export function SearchBar({ onSearch, placeholder = "Search products...", initialValue = "" }: SearchBarProps) {
+  const [query, setQuery] = useState(initialValue)
+  const [debouncedQuery, setDebouncedQuery] = useState(initialValue)
 
-    if (searchTerm.trim()) {
-      params.set("search", searchTerm.trim())
-    } else {
-      params.delete("search")
-    }
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query)
+    }, 300)
 
-    router.push(`/shop?${params.toString()}`)
+    return () => clearTimeout(timer)
+  }, [query])
+
+  // Call onSearch when debounced query changes
+  useEffect(() => {
+    onSearch(debouncedQuery)
+  }, [debouncedQuery, onSearch])
+
+  const handleClear = () => {
+    setQuery("")
+    onSearch("")
   }
 
-  const clearSearch = () => {
-    setSearchTerm("")
-    const params = new URLSearchParams(searchParams.toString())
-    params.delete("search")
-    router.push(`/shop?${params.toString()}`)
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSearch(query)
   }
 
   return (
-    <form onSubmit={handleSearch} className="relative">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+    <form onSubmit={handleSubmit} className="relative flex items-center w-full max-w-md">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
         <Input
           type="text"
-          placeholder="Search products and services..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 pr-20 h-12 text-lg bg-white/80 backdrop-blur-sm border-slate-200/60 focus:bg-white transition-colors"
+          placeholder={placeholder}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="pl-10 pr-10 h-11 bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500"
         />
-        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
-          {searchTerm && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={clearSearch}
-              className="h-8 w-8 p-0 hover:bg-gray-100"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-          <Button type="submit" size="sm" className="h-8">
-            Search
+        {query && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleClear}
+            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-slate-100"
+          >
+            <X className="h-4 w-4 text-slate-400" />
           </Button>
-        </div>
+        )}
       </div>
     </form>
   )
