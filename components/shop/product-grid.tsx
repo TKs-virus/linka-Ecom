@@ -33,7 +33,7 @@ export function ProductGrid({ products }: ProductGridProps) {
         >
           <div className="relative aspect-square overflow-hidden">
             <Image
-              src={product.images[0] || "/placeholder.svg?height=300&width=300"}
+              src={product.images?.[0] ?? "/placeholder.svg?height=300&width=300"}
               alt={product.name}
               fill
               className="object-cover transition-transform group-hover:scale-105"
