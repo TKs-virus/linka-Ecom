@@ -1,3 +1,5 @@
+import { createClient } from "supabase-js" // Assuming createClient is imported from supabase-js
+
 export async function getProducts(searchTerm?: string, category?: string) {
   try {
     const supabase = createClient()
@@ -24,4 +26,41 @@ export async function getProducts(searchTerm?: string, category?: string) {
     console.log("[getProducts] Exception → using mock data:", err)
     return getMockProducts(searchTerm, category)
   }
+}
+
+function getMockProducts(searchTerm?: string, category?: string) {
+  const mockProducts = [
+    {
+      id: "1",
+      name: "Mock Product 1",
+      description: "This is a mock product",
+      price: 20,
+      category: "mock",
+      imageUrl: "/placeholder.svg?height=200&width=300",
+    },
+    {
+      id: "2",
+      name: "Mock Product 2",
+      description: "This is another mock product",
+      price: 30,
+      category: "mock",
+      imageUrl: "/placeholder.svg?height=200&width=300",
+    },
+  ]
+
+  let filteredProducts = mockProducts
+
+  if (searchTerm) {
+    filteredProducts = filteredProducts.filter(
+      (product) =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+  }
+
+  if (category && category !== "all") {
+    filteredProducts = filteredProducts.filter((product) => product.category === category)
+  }
+
+  return filteredProducts
 }
