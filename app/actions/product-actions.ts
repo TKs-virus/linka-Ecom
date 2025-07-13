@@ -12,21 +12,32 @@ const mockProducts = [
     sku: "WBH-001",
     category: "Electronics",
     price: 299.99,
+    compare_at_price: 399.99,
     stock_quantity: 45,
     status: "active",
     description: "High-quality wireless headphones with noise cancellation",
     brand: "TechSound",
+    type: "product",
+    images: ["/placeholder.svg?height=300&width=300"],
+    retailer_name: "Tech Electronics Store",
+    rating: 4.8,
+    reviews_count: 124,
   },
   {
     id: "2",
     name: "Cotton T-Shirt",
     sku: "CTS-002",
-    category: "Clothing",
+    category: "Fashion",
     price: 29.99,
     stock_quantity: 120,
     status: "active",
-    description: "Comfortable 100% cotton t-shirt",
+    description: "Comfortable 100% cotton t-shirt available in multiple colors",
     brand: "ComfortWear",
+    type: "product",
+    images: ["/placeholder.svg?height=300&width=300"],
+    retailer_name: "Fashion Forward",
+    rating: 4.6,
+    reviews_count: 89,
   },
   {
     id: "3",
@@ -34,16 +45,64 @@ const mockProducts = [
     sku: "SW-003",
     category: "Electronics",
     price: 199.99,
+    compare_at_price: 249.99,
     stock_quantity: 8,
     status: "active",
-    description: "Feature-rich smartwatch with health tracking",
+    description: "Feature-rich smartwatch with health tracking and GPS",
     brand: "SmartTech",
+    type: "product",
+    images: ["/placeholder.svg?height=300&width=300"],
+    retailer_name: "Tech Electronics Store",
+    rating: 4.9,
+    reviews_count: 256,
+  },
+  {
+    id: "4",
+    name: "Professional Web Design",
+    category: "Design",
+    price: 899.99,
+    status: "active",
+    description: "Custom website design and development for your business",
+    type: "service",
+    images: ["/placeholder.svg?height=300&width=300"],
+    retailer_name: "Digital Creative Studio",
+    rating: 4.9,
+    reviews_count: 67,
+    duration: "2-3 weeks",
+  },
+  {
+    id: "5",
+    name: "Home Cleaning Service",
+    category: "Home Services",
+    price: 75.0,
+    status: "active",
+    description: "Professional home cleaning service for apartments and houses",
+    type: "service",
+    images: ["/placeholder.svg?height=300&width=300"],
+    retailer_name: "CleanPro Services",
+    rating: 4.7,
+    reviews_count: 143,
+    duration: "2-4 hours",
+  },
+  {
+    id: "6",
+    name: "Personal Training Session",
+    category: "Health & Fitness",
+    price: 45.0,
+    status: "active",
+    description: "One-on-one personal training session with certified trainer",
+    type: "service",
+    images: ["/placeholder.svg?height=300&width=300"],
+    retailer_name: "FitLife Gym",
+    rating: 4.8,
+    reviews_count: 92,
+    duration: "1 hour",
   },
 ]
 
 export interface Product {
   id: string
-  retailer_id: string
+  retailer_id?: string
   name: string
   description?: string
   price: number
@@ -51,10 +110,17 @@ export interface Product {
   category: string
   subcategory?: string
   images: string[]
-  inventory_count: number
-  is_active: boolean
-  created_at: string
-  updated_at: string
+  inventory_count?: number
+  stock_quantity?: number
+  is_active?: boolean
+  created_at?: string
+  updated_at?: string
+  type: "product" | "service"
+  retailer_name?: string
+  rating?: number
+  reviews_count?: number
+  duration?: string
+  brand?: string
 }
 
 export async function getProducts(filters?: {
@@ -62,6 +128,7 @@ export async function getProducts(filters?: {
   search?: string
   minPrice?: number
   maxPrice?: number
+  type?: "product" | "service" | "all"
 }): Promise<Product[]> {
   const supabase = createServerClient()
 
@@ -83,18 +150,40 @@ export async function getProducts(filters?: {
     query = query.lte("price", filters.maxPrice)
   }
 
-  const { data: products, error } = await query
-
-  // ---------- graceful-degradation ----------
-  // If Supabase isn’t reachable or the table doesn’t exist yet
-  // (common during local preview), fall back to in-memory mock data
-  // instead of crashing the page.
-  if (error) {
-    console.error("[getProducts] Supabase error → using mock data:", error.message)
-    return mockProducts as Product[]
+  if (filters?.type && filters.type !== "all") {
+    query = query.eq("type", filters.type)
   }
 
-  // No rows yet?  Return an empty array so UI can still render.
+  const { data: products, error } = await query
+
+  // Graceful degradation - fall back to mock data if Supabase isn't available
+  if (error) {
+    console.error("[getProducts] Supabase error → using mock data:", error.message)
+    let filteredMockProducts = [...mockProducts]
+
+    // Apply filters to mock data
+    if (filters?.type && filters.type !== "all") {
+      filteredMockProducts = filteredMockProducts.filter((p) => p.type === filters.type)
+    }
+    if (filters?.category) {
+      filteredMockProducts = filteredMockProducts.filter((p) => p.category === filters.category)
+    }
+    if (filters?.search) {
+      const searchLower = filters.search.toLowerCase()
+      filteredMockProducts = filteredMockProducts.filter(
+        (p) => p.name.toLowerCase().includes(searchLower) || p.description?.toLowerCase().includes(searchLower),
+      )
+    }
+    if (filters?.minPrice) {
+      filteredMockProducts = filteredMockProducts.filter((p) => p.price >= filters.minPrice!)
+    }
+    if (filters?.maxPrice) {
+      filteredMockProducts = filteredMockProducts.filter((p) => p.price <= filters.maxPrice!)
+    }
+
+    return filteredMockProducts as Product[]
+  }
+
   if (!products) {
     return []
   }
