@@ -5,19 +5,11 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { X, Star, MapPin, Clock, Award } from "lucide-react"
-import { useState } from "react"
+import { Separator } from "@/components/ui/separator"
+import { X, Star } from "lucide-react"
+import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-
-const categories = [
-  { id: "Electronics", name: "Electronics", count: 45 },
-  { id: "Fashion", name: "Fashion", count: 32 },
-  { id: "Home Services", name: "Home Services", count: 28 },
-  { id: "Health & Fitness", name: "Health & Fitness", count: 19 },
-  { id: "Design", name: "Design", count: 15 },
-  { id: "Food & Beverage", name: "Food & Beverage", count: 12 },
-]
+import { getProductCategories } from "@/app/actions/product-actions"
 
 const retailers = [
   { id: "tech-store", name: "Tech Electronics", count: 23, rating: 4.8 },
@@ -36,41 +28,35 @@ const ratings = [
 export function ProductFilters() {
   const router = useRouter()
   const searchParams = useSearchParams()
-
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    searchParams.get("category") ? [searchParams.get("category")!] : [],
-  )
+  const [categories, setCategories] = useState<string[]>([])
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100])
   const [selectedRetailers, setSelectedRetailers] = useState<string[]>([])
-  const [priceRange, setPriceRange] = useState([0, 1000])
   const [selectedRating, setSelectedRating] = useState<number | null>(null)
   const [showOnSale, setShowOnSale] = useState(false)
   const [showInStock, setShowInStock] = useState(true)
   const [showFastDelivery, setShowFastDelivery] = useState(false)
 
-  const updateFilters = () => {
-    const params = new URLSearchParams(searchParams.toString())
+  useEffect(() => {
+    // Load categories
+    getProductCategories().then(setCategories)
 
-    // Update categories
-    if (selectedCategories.length > 0) {
-      params.set("category", selectedCategories[0]) // For simplicity, use first category
-    } else {
-      params.delete("category")
+    // Initialize filters from URL params
+    const categoryParam = searchParams.get("category")
+    if (categoryParam) {
+      setSelectedCategories([categoryParam])
     }
 
-    // Update price range
-    if (priceRange[0] > 0) params.set("minPrice", priceRange[0].toString())
-    else params.delete("minPrice")
+    const minPrice = searchParams.get("minPrice")
+    const maxPrice = searchParams.get("maxPrice")
+    if (minPrice || maxPrice) {
+      setPriceRange([minPrice ? Number.parseFloat(minPrice) : 0, maxPrice ? Number.parseFloat(maxPrice) : 100])
+    }
+  }, [searchParams])
 
-    if (priceRange[1] < 1000) params.set("maxPrice", priceRange[1].toString())
-    else params.delete("maxPrice")
+  const handleCategoryChange = (category: string, checked: boolean) => {
+    const newCategories = checked ? [...selectedCategories, category] : selectedCategories.filter((c) => c !== category)
 
-    router.push(`/shop?${params.toString()}`)
-  }
-
-  const toggleCategory = (categoryId: string) => {
-    const newCategories = selectedCategories.includes(categoryId)
-      ? selectedCategories.filter((id) => id !== categoryId)
-      : [...selectedCategories, categoryId]
     setSelectedCategories(newCategories)
   }
 
@@ -80,10 +66,34 @@ export function ProductFilters() {
     )
   }
 
-  const clearAllFilters = () => {
+  const applyFilters = () => {
+    const params = new URLSearchParams(searchParams.toString())
+
+    // Clear existing filter params
+    params.delete("category")
+    params.delete("minPrice")
+    params.delete("maxPrice")
+
+    // Add new filter params
+    if (selectedCategories.length === 1) {
+      params.set("category", selectedCategories[0])
+    }
+
+    if (priceRange[0] > 0) {
+      params.set("minPrice", priceRange[0].toString())
+    }
+
+    if (priceRange[1] < 100) {
+      params.set("maxPrice", priceRange[1].toString())
+    }
+
+    router.push(`/shop?${params.toString()}`)
+  }
+
+  const clearFilters = () => {
     setSelectedCategories([])
     setSelectedRetailers([])
-    setPriceRange([0, 1000])
+    setPriceRange([0, 100])
     setSelectedRating(null)
     setShowOnSale(false)
     setShowInStock(true)
@@ -93,6 +103,7 @@ export function ProductFilters() {
     params.delete("category")
     params.delete("minPrice")
     params.delete("maxPrice")
+
     router.push(`/shop?${params.toString()}`)
   }
 
@@ -102,188 +113,114 @@ export function ProductFilters() {
     (selectedRating ? 1 : 0) +
     (showOnSale ? 1 : 0) +
     (showFastDelivery ? 1 : 0) +
-    (priceRange[0] > 0 || priceRange[1] < 1000 ? 1 : 0)
+    (priceRange[0] > 0 || priceRange[1] < 100 ? 1 : 0)
 
   return (
-    <div className="space-y-6">
+    <Card className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900">Filters</h2>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-medium text-orange-800">Filters</CardTitle>
+      </CardHeader>
+      <CardContent className="pt-0 space-y-6">
+        {/* Active Filters */}
         {activeFiltersCount > 0 && (
-          <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-red-600 hover:text-red-700">
-            Clear All
-            <Badge variant="destructive" className="ml-2">
-              {activeFiltersCount}
-            </Badge>
-          </Button>
-        )}
-      </div>
-
-      {/* Active Filters */}
-      {activeFiltersCount > 0 && (
-        <Card className="border-orange-200 bg-orange-50">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-orange-800">Active Filters</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
+          <div className="border-orange-200 bg-orange-50 p-4">
             <div className="flex flex-wrap gap-2">
               {selectedCategories.map((categoryId) => {
-                const category = categories.find((c) => c.id === categoryId)
+                const category = categories.find((c) => c === categoryId)
                 return (
-                  <Badge key={categoryId} variant="secondary" className="flex items-center gap-1 bg-white">
-                    {category?.name}
-                    <X className="h-3 w-3 cursor-pointer" onClick={() => toggleCategory(categoryId)} />
-                  </Badge>
+                  <div
+                    key={categoryId}
+                    className="flex items-center gap-1 bg-white text-sm font-medium px-3 py-1 rounded-full"
+                  >
+                    {category}
+                    <X className="h-3 w-3 cursor-pointer" onClick={() => handleCategoryChange(categoryId, false)} />
+                  </div>
                 )
               })}
               {selectedRetailers.map((retailerId) => {
                 const retailer = retailers.find((r) => r.id === retailerId)
                 return (
-                  <Badge key={retailerId} variant="secondary" className="flex items-center gap-1 bg-white">
+                  <div
+                    key={retailerId}
+                    className="flex items-center gap-1 bg-white text-sm font-medium px-3 py-1 rounded-full"
+                  >
                     {retailer?.name}
                     <X className="h-3 w-3 cursor-pointer" onClick={() => toggleRetailer(retailerId)} />
-                  </Badge>
+                  </div>
                 )
               })}
               {showOnSale && (
-                <Badge variant="secondary" className="flex items-center gap-1 bg-white">
+                <div className="flex items-center gap-1 bg-white text-sm font-medium px-3 py-1 rounded-full">
                   On Sale
                   <X className="h-3 w-3 cursor-pointer" onClick={() => setShowOnSale(false)} />
-                </Badge>
+                </div>
               )}
               {showFastDelivery && (
-                <Badge variant="secondary" className="flex items-center gap-1 bg-white">
+                <div className="flex items-center gap-1 bg-white text-sm font-medium px-3 py-1 rounded-full">
                   Fast Delivery
                   <X className="h-3 w-3 cursor-pointer" onClick={() => setShowFastDelivery(false)} />
-                </Badge>
+                </div>
               )}
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Price Range */}
-      <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <span>💰</span>
-            Price Range
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Slider
-            value={priceRange}
-            onValueChange={setPriceRange}
-            max={1000}
-            step={10}
-            className="w-full"
-            onValueCommit={updateFilters}
-          />
-          <div className="flex items-center justify-between text-sm font-medium">
-            <span className="bg-gray-100 px-3 py-1 rounded-full">K{priceRange[0]}</span>
-            <span className="text-gray-400">to</span>
-            <span className="bg-gray-100 px-3 py-1 rounded-full">K{priceRange[1]}</span>
           </div>
-        </CardContent>
-      </Card>
+        )}
 
-      {/* Categories */}
-      <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <span>📂</span>
-            Categories
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {categories.map((category) => (
-            <div key={category.id} className="flex items-center justify-between group">
-              <div className="flex items-center space-x-3">
+        {/* Categories */}
+        <div>
+          <Label className="text-base font-medium">Categories</Label>
+          <div className="mt-3 space-y-3">
+            {categories.map((category) => (
+              <div key={category} className="flex items-center space-x-2">
                 <Checkbox
-                  id={category.id}
-                  checked={selectedCategories.includes(category.id)}
-                  onCheckedChange={() => {
-                    toggleCategory(category.id)
-                    setTimeout(updateFilters, 100)
-                  }}
+                  id={category}
+                  checked={selectedCategories.includes(category)}
+                  onCheckedChange={(checked) => handleCategoryChange(category, checked as boolean)}
                 />
-                <Label
-                  htmlFor={category.id}
-                  className="text-sm font-normal cursor-pointer group-hover:text-blue-600 transition-colors"
-                >
-                  {category.name}
+                <Label htmlFor={category} className="text-sm font-normal capitalize cursor-pointer">
+                  {category}
                 </Label>
               </div>
-              <Badge variant="outline" className="text-xs">
-                {category.count}
-              </Badge>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+            ))}
+          </div>
+        </div>
 
-      {/* Rating */}
-      <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            Customer Rating
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {ratings.map((rating) => (
-            <div key={rating.value} className="flex items-center justify-between group">
-              <div className="flex items-center space-x-3">
-                <Checkbox
-                  id={`rating-${rating.value}`}
-                  checked={selectedRating === rating.value}
-                  onCheckedChange={() => setSelectedRating(selectedRating === rating.value ? null : rating.value)}
-                />
-                <Label
-                  htmlFor={`rating-${rating.value}`}
-                  className="text-sm font-normal cursor-pointer group-hover:text-blue-600 transition-colors flex items-center gap-1"
-                >
-                  {rating.label}
-                  <div className="flex">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-3 h-3 ${i < rating.value ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
-                      />
-                    ))}
-                  </div>
-                </Label>
-              </div>
-              <Badge variant="outline" className="text-xs">
-                {rating.count}
-              </Badge>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+        <Separator />
 
-      {/* Retailers */}
-      <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <MapPin className="w-4 h-4" />
-            Local Stores
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {retailers.map((retailer) => (
-            <div key={retailer.id} className="flex items-center justify-between group">
-              <div className="flex items-center space-x-3">
+        {/* Price Range */}
+        <div>
+          <Label className="text-base font-medium">Price Range</Label>
+          <div className="mt-3">
+            <Slider
+              value={priceRange}
+              onValueChange={(value) => setPriceRange(value as [number, number])}
+              max={100}
+              min={0}
+              step={1}
+              className="w-full"
+            />
+            <div className="flex justify-between text-sm text-muted-foreground mt-2">
+              <span>${priceRange[0]}</span>
+              <span>${priceRange[1]}</span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Retailers */}
+        <div>
+          <Label className="text-base font-medium">Local Stores</Label>
+          <div className="mt-3 space-y-3">
+            {retailers.map((retailer) => (
+              <div key={retailer.id} className="flex items-center space-x-2">
                 <Checkbox
                   id={retailer.id}
                   checked={selectedRetailers.includes(retailer.id)}
-                  onCheckedChange={() => toggleRetailer(retailer.id)}
+                  onCheckedChange={(checked) => toggleRetailer(retailer.id)}
                 />
                 <div className="flex flex-col">
-                  <Label
-                    htmlFor={retailer.id}
-                    className="text-sm font-normal cursor-pointer group-hover:text-blue-600 transition-colors"
-                  >
+                  <Label htmlFor={retailer.id} className="text-sm font-normal capitalize cursor-pointer">
                     {retailer.name}
                   </Label>
                   <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -292,57 +229,75 @@ export function ProductFilters() {
                   </div>
                 </div>
               </div>
-              <Badge variant="outline" className="text-xs">
-                {retailer.count}
-              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Rating */}
+        <div>
+          <Label className="text-base font-medium">Customer Rating</Label>
+          <div className="mt-3 space-y-3">
+            {ratings.map((rating) => (
+              <div key={rating.value} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`rating-${rating.value}`}
+                  checked={selectedRating === rating.value}
+                  onCheckedChange={() => setSelectedRating(selectedRating === rating.value ? null : rating.value)}
+                />
+                <Label htmlFor={`rating-${rating.value}`} className="text-sm font-normal capitalize cursor-pointer">
+                  {rating.label}
+                </Label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Additional Filters */}
+        <div>
+          <Label className="text-base font-medium">Special Offers</Label>
+          <div className="mt-3 space-y-3">
+            <div className="flex items-center space-x-2">
+              <Checkbox id="on-sale" checked={showOnSale} onCheckedChange={setShowOnSale} />
+              <Label htmlFor="on-sale" className="text-sm font-normal capitalize cursor-pointer">
+                On Sale
+              </Label>
             </div>
-          ))}
-        </CardContent>
-      </Card>
 
-      {/* Additional Filters */}
-      <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Award className="w-4 h-4" />
-            Special Offers
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center space-x-3">
-            <Checkbox id="on-sale" checked={showOnSale} onCheckedChange={setShowOnSale} />
-            <Label htmlFor="on-sale" className="text-sm font-normal cursor-pointer flex items-center gap-2">
-              <span>🏷️</span>
-              On Sale
-            </Label>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="in-stock" checked={showInStock} onCheckedChange={setShowInStock} />
+              <Label htmlFor="in-stock" className="text-sm font-normal capitalize cursor-pointer">
+                In Stock Only
+              </Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox id="fast-delivery" checked={showFastDelivery} onCheckedChange={setShowFastDelivery} />
+              <Label htmlFor="fast-delivery" className="text-sm font-normal capitalize cursor-pointer">
+                Fast Delivery
+              </Label>
+            </div>
           </div>
+        </div>
 
-          <div className="flex items-center space-x-3">
-            <Checkbox id="in-stock" checked={showInStock} onCheckedChange={setShowInStock} />
-            <Label htmlFor="in-stock" className="text-sm font-normal cursor-pointer flex items-center gap-2">
-              <span>✅</span>
-              In Stock Only
-            </Label>
-          </div>
+        <Separator />
 
-          <div className="flex items-center space-x-3">
-            <Checkbox id="fast-delivery" checked={showFastDelivery} onCheckedChange={setShowFastDelivery} />
-            <Label htmlFor="fast-delivery" className="text-sm font-normal cursor-pointer flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              Fast Delivery
-            </Label>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Apply Filters Button */}
-      <Button
-        onClick={updateFilters}
-        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl py-6"
-        size="lg"
-      >
-        Apply Filters
-      </Button>
-    </div>
+        {/* Action Buttons */}
+        <div className="space-y-2">
+          <Button
+            onClick={applyFilters}
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl py-6"
+          >
+            Apply Filters
+          </Button>
+          <Button onClick={clearFilters} variant="outline" className="w-full bg-transparent">
+            Clear Filters
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
