@@ -1,5 +1,6 @@
 "use client"
 
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Package, Wrench, Palette, Home, Dumbbell, Laptop, ShoppingBag } from "lucide-react"
@@ -46,36 +47,36 @@ export function CategoryTabs({ currentType = "all" }: CategoryTabsProps) {
   return (
     <div className="space-y-6">
       {/* Main Type Tabs */}
-      <div className="flex justify-center">
-        <div className="flex items-center bg-white rounded-2xl p-2 shadow-lg border">
-          {categories.map((category) => {
-            const Icon = category.icon
-            const isActive = currentType === category.id
-
-            return (
-              <Button
-                key={category.id}
-                variant={isActive ? "default" : "ghost"}
-                onClick={() => handleTypeChange(category.id)}
-                className={`
-                  relative px-6 py-3 rounded-xl transition-all duration-200
-                  ${
-                    isActive
-                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                  }
-                `}
-              >
-                <Icon className="w-5 h-5 mr-2" />
-                <span className="font-medium">{category.label}</span>
-                <Badge variant="secondary" className={`ml-2 ${isActive ? "bg-white/20 text-white" : "bg-gray-100"}`}>
-                  {category.count}
-                </Badge>
-              </Button>
-            )
-          })}
-        </div>
-      </div>
+      <Tabs defaultValue={currentType} onValueChange={handleTypeChange}>
+        <TabsList className="mx-auto w-full max-w-md justify-center">
+          {categories.map((category) => (
+            <TabsTrigger key={category.id} value={category.id}>
+              <div className="flex items-center bg-white rounded-2xl p-2 shadow-lg border">
+                <Button
+                  variant={currentType === category.id ? "default" : "ghost"}
+                  className={`
+                    relative px-6 py-3 rounded-xl transition-all duration-200
+                    ${
+                      currentType === category.id
+                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    }
+                  `}
+                >
+                  {category.icon({ className: "w-5 h-5 mr-2" })}
+                  <span className="font-medium">{category.label}</span>
+                  <Badge
+                    variant="secondary"
+                    className={`ml-2 ${currentType === category.id ? "bg-white/20 text-white" : "bg-gray-100"}`}
+                  >
+                    {category.count}
+                  </Badge>
+                </Button>
+              </div>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {/* Sub Categories */}
       <div className="flex justify-center">

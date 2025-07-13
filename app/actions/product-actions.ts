@@ -130,65 +130,41 @@ export async function getProducts(filters?: {
   maxPrice?: number
   type?: "product" | "service" | "all"
 }): Promise<Product[]> {
-  const supabase = createServerClient()
+  // ----------------- NEW IMPLEMENTATION -----------------
+  try {
+    const supabase = createServerClient()
 
-  let query = supabase.from("products").select("*").eq("is_active", true).order("created_at", { ascending: false })
+    let query = supabase.from("products").select("*").eq("is_active", true).order("created_at", { ascending: false })
 
-  if (filters?.category) {
-    query = query.eq("category", filters.category)
-  }
-
-  if (filters?.search) {
-    query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
-  }
-
-  if (filters?.minPrice) {
-    query = query.gte("price", filters.minPrice)
-  }
-
-  if (filters?.maxPrice) {
-    query = query.lte("price", filters.maxPrice)
-  }
-
-  if (filters?.type && filters.type !== "all") {
-    query = query.eq("type", filters.type)
-  }
-
-  const { data: products, error } = await query
-
-  // Graceful degradation - fall back to mock data if Supabase isn't available
-  if (error) {
-    console.error("[getProducts] Supabase error → using mock data:", error.message)
-    let filteredMockProducts = [...mockProducts]
-
-    // Apply filters to mock data
-    if (filters?.type && filters.type !== "all") {
-      filteredMockProducts = filteredMockProducts.filter((p) => p.type === filters.type)
-    }
-    if (filters?.category) {
-      filteredMockProducts = filteredMockProducts.filter((p) => p.category === filters.category)
-    }
+    if (filters?.category) query = query.eq("category", filters.category)
+    if (filters?.type && filters.type !== "all") query = query.eq("type", filters.type)
+    if (filters?.minPrice) query = query.gte("price", filters.minPrice)
+    if (filters?.maxPrice) query = query.lte("price", filters.maxPrice)
     if (filters?.search) {
-      const searchLower = filters.search.toLowerCase()
-      filteredMockProducts = filteredMockProducts.filter(
-        (p) => p.name.toLowerCase().includes(searchLower) || p.description?.toLowerCase().includes(searchLower),
-      )
-    }
-    if (filters?.minPrice) {
-      filteredMockProducts = filteredMockProducts.filter((p) => p.price >= filters.minPrice!)
-    }
-    if (filters?.maxPrice) {
-      filteredMockProducts = filteredMockProducts.filter((p) => p.price <= filters.maxPrice!)
+      const s = filters.search.trim()
+      query = query.or(`name.ilike.*${s}*,description.ilike.*${s}*`)
     }
 
-    return filteredMockProducts as Product[]
+    const { data, error } = await query
+
+    if (error) throw error
+    return (data ?? []) as Product[]
+  } catch (err) {
+    // Any error → fall back to mock data with client-side filtering
+    console.error("[getProducts] Supabase error → using mock data:", (err as Error).message)
+
+    let results = [...mockProducts]
+    if (filters?.type && filters.type !== "all") results = results.filter((p) => p.type === filters.type)
+    if (filters?.category) results = results.filter((p) => p.category === filters.category)
+    if (filters?.search) {
+      const s = filters.search.toLowerCase()
+      results = results.filter((p) => p.name.toLowerCase().includes(s) || p.description?.toLowerCase().includes(s))
+    }
+    if (filters?.minPrice) results = results.filter((p) => p.price >= filters.minPrice!)
+    if (filters?.maxPrice) results = results.filter((p) => p.price <= filters.maxPrice!)
+
+    return results as Product[]
   }
-
-  if (!products) {
-    return []
-  }
-
-  return products as Product[]
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
