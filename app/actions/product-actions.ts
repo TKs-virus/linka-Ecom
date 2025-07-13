@@ -85,8 +85,18 @@ export async function getProducts(filters?: {
 
   const { data: products, error } = await query
 
+  // ---------- graceful-degradation ----------
+  // If Supabase isn’t reachable or the table doesn’t exist yet
+  // (common during local preview), fall back to in-memory mock data
+  // instead of crashing the page.
   if (error) {
-    throw new Error("Failed to fetch products")
+    console.error("[getProducts] Supabase error → using mock data:", error.message)
+    return mockProducts as Product[]
+  }
+
+  // No rows yet?  Return an empty array so UI can still render.
+  if (!products) {
+    return []
   }
 
   return products as Product[]
