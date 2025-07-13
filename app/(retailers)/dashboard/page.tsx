@@ -21,13 +21,11 @@ import {
   Eye,
   Star,
   Target,
-  BookOpen,
   BarChart3,
   FileText,
   UserCheck,
   Boxes,
   Zap,
-  Sparkles,
   Bell,
   Settings,
   Home,
@@ -37,7 +35,6 @@ import {
   Activity,
   CreditCard,
   Globe,
-  Phone,
   MapPin,
   Clock,
   AlertTriangle,
@@ -46,8 +43,6 @@ import {
   PieChart,
   MoreHorizontal,
   CalendarIcon,
-  Briefcase,
-  Award,
   Percent,
 } from "lucide-react"
 import {
@@ -60,6 +55,7 @@ import {
   ResponsiveContainer,
   Area,
   AreaChart,
+  PieChart as RechartsPieChart,
   Pie,
   Line,
   ComposedChart,
@@ -221,12 +217,65 @@ const quickActions = [
   { name: "Settings", icon: Settings, href: "/dashboard/settings", color: "bg-slate-600" },
 ]
 
+// Custom Tooltip component to prevent context issues
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white/95 border border-slate-200 rounded-lg p-3 shadow-lg backdrop-blur-sm">
+        <p className="font-semibold text-slate-800">{`${label}: ${payload[0].value}%`}</p>
+        <p className="text-sm text-slate-600">{`${payload[0].payload.orders} orders`}</p>
+        <p className="text-sm text-emerald-600 font-medium">{payload[0].payload.trend}</p>
+      </div>
+    )
+  }
+  return null
+}
+
+// Safe PieChart component with error boundary
+const SafePieChart = ({ data }: { data: typeof salesDistributionData }) => {
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-48 text-slate-500">
+        <div className="text-center">
+          <PieChart className="w-12 h-12 mx-auto mb-2 opacity-50" />
+          <p>No data available</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height={200}>
+      <RechartsPieChart>
+        <Pie
+          data={data}
+          cx="50%"
+          cy="50%"
+          innerRadius={50}
+          outerRadius={90}
+          paddingAngle={2}
+          dataKey="value"
+          stroke="#ffffff"
+          strokeWidth={2}
+        >
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.color} />
+          ))}
+        </Pie>
+        <Tooltip content={<CustomTooltip />} />
+      </RechartsPieChart>
+    </ResponsiveContainer>
+  )
+}
+
 export default function RetailerDashboardDemo() {
   const [activeTab, setActiveTab] = useState("overview")
   const [isLoading, setIsLoading] = useState(true)
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const timer = setTimeout(() => setIsLoading(false), 1200)
     const timeInterval = setInterval(() => setCurrentTime(new Date()), 1000)
 
@@ -235,6 +284,30 @@ export default function RetailerDashboardDemo() {
       clearInterval(timeInterval)
     }
   }, [])
+
+  // Don't render charts until component is mounted to prevent SSR issues
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center space-y-8">
+          <div className="relative">
+            <div className="w-24 h-24 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-3xl flex items-center justify-center animate-pulse shadow-2xl">
+              <BarChart3 className="w-12 h-12 text-white" />
+            </div>
+            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center">
+              <Zap className="w-4 h-4 text-white" />
+            </div>
+          </div>
+          <div className="space-y-4">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              Initializing Dashboard
+            </h2>
+            <p className="text-slate-600 font-medium text-lg">Setting up your business insights...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (
@@ -593,7 +666,7 @@ export default function RetailerDashboardDemo() {
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={350}>
-                    <ComposedChart data={revenueData}>
+                    <ComposedChart data={revenueData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                       <defs>
                         <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#6366F1" stopOpacity={0.3} />
@@ -642,32 +715,7 @@ export default function RetailerDashboardDemo() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-center mb-6">
-                    <ResponsiveContainer width="100%" height={200}>
-                      <PieChart>
-                        <Pie
-                          data={salesDistributionData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={50}
-                          outerRadius={90}
-                          dataKey="value"
-                          stroke="#ffffff"
-                          strokeWidth={3}
-                        >
-                          {salesDistributionData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "rgba(255, 255, 255, 0.95)",
-                            border: "1px solid #E2E8F0",
-                            borderRadius: "8px",
-                            backdropFilter: "blur(10px)",
-                          }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
+                    <SafePieChart data={salesDistributionData} />
                   </div>
                   <div className="space-y-4">
                     {salesDistributionData.map((item, index) => (
@@ -813,7 +861,7 @@ export default function RetailerDashboardDemo() {
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={400}>
-                    <ComposedChart data={revenueData}>
+                    <ComposedChart data={revenueData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
                       <XAxis dataKey="month" stroke="#64748B" fontSize={12} />
                       <YAxis stroke="#64748B" fontSize={12} />
@@ -915,7 +963,7 @@ export default function RetailerDashboardDemo() {
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={revenueData}>
+                    <AreaChart data={revenueData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                       <defs>
                         <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
@@ -1085,322 +1133,4 @@ export default function RetailerDashboardDemo() {
                       <span className="text-slate-800 font-medium">6 hours ago</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">Format:</span>
-                      <span className="text-slate-800 font-medium">Excel, PDF</span>
-                    </div>
-                  </div>
-                  <Button className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white">
-                    Generate Report
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/60 backdrop-blur-sm border-slate-200/60 shadow-lg hover:shadow-xl transition-all duration-300 group">
-                <CardContent className="p-8">
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <BarChart3 className="w-8 h-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-800">Financial Report</h3>
-                  </div>
-                  <p className="text-slate-600 mb-6 leading-relaxed">
-                    Profit & loss statements, cash flow analysis, and financial performance metrics.
-                  </p>
-                  <div className="space-y-3 mb-6">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">Last generated:</span>
-                      <span className="text-slate-800 font-medium">3 days ago</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">Format:</span>
-                      <span className="text-slate-800 font-medium">PDF, Excel</span>
-                    </div>
-                  </div>
-                  <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white">
-                    Generate Report
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/60 backdrop-blur-sm border-slate-200/60 shadow-lg hover:shadow-xl transition-all duration-300 group">
-                <CardContent className="p-8">
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-pink-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <Target className="w-8 h-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-800">Marketing Report</h3>
-                  </div>
-                  <p className="text-slate-600 mb-6 leading-relaxed">
-                    Campaign performance, ROI analysis, and customer acquisition metrics for growth optimization.
-                  </p>
-                  <div className="space-y-3 mb-6">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">Last generated:</span>
-                      <span className="text-slate-800 font-medium">1 week ago</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">Format:</span>
-                      <span className="text-slate-800 font-medium">PDF, PowerPoint</span>
-                    </div>
-                  </div>
-                  <Button className="w-full bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-700 hover:to-pink-800 text-white">
-                    Generate Report
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/60 backdrop-blur-sm border-slate-200/60 shadow-lg hover:shadow-xl transition-all duration-300 group">
-                <CardContent className="p-8">
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <Award className="w-8 h-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-800">Performance Report</h3>
-                  </div>
-                  <p className="text-slate-600 mb-6 leading-relaxed">
-                    Overall business performance, KPI tracking, and goal achievement analysis.
-                  </p>
-                  <div className="space-y-3 mb-6">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">Last generated:</span>
-                      <span className="text-slate-800 font-medium">5 days ago</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">Format:</span>
-                      <span className="text-slate-800 font-medium">PDF, Dashboard</span>
-                    </div>
-                  </div>
-                  <Button className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white">
-                    Generate Report
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="insights" className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* AI-Powered Business Insights */}
-              <div className="space-y-6">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                    AI-Powered Insights
-                  </h3>
-                </div>
-
-                <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200/60 shadow-lg">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Target className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-bold mb-3 text-slate-800">Optimize Product Listings</h4>
-                        <p className="text-slate-600 mb-4 leading-relaxed">
-                          Your electronics category shows 18% higher conversion when product descriptions include
-                          technical specifications. Consider enhancing 23 product listings to boost sales by an
-                          estimated 12%.
-                        </p>
-                        <div className="flex items-center space-x-3">
-                          <Button variant="outline" size="sm" className="bg-white/60 backdrop-blur-sm">
-                            <BookOpen className="w-4 h-4 mr-2" />
-                            Learn More
-                          </Button>
-                          <Badge className="bg-blue-100 text-blue-700">High Impact</Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200/60 shadow-lg">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <TrendingUp className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-bold mb-3 text-slate-800">Expand Marketing Reach</h4>
-                        <p className="text-slate-600 mb-4 leading-relaxed">
-                          Peak shopping hours are 2-4 PM and 7-9 PM. Increasing ad spend during these windows could
-                          improve ROI by 24% based on current conversion patterns.
-                        </p>
-                        <div className="flex items-center space-x-3">
-                          <Button variant="outline" size="sm" className="bg-white/60 backdrop-blur-sm">
-                            <TrendingUp className="w-4 h-4 mr-2" />
-                            Implement
-                          </Button>
-                          <Badge className="bg-emerald-100 text-emerald-700">Medium Impact</Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200/60 shadow-lg">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Users className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-bold mb-3 text-slate-800">Customer Loyalty Program</h4>
-                        <p className="text-slate-600 mb-4 leading-relaxed">
-                          Customers who make 3+ purchases have 67% higher lifetime value. A points-based loyalty program
-                          could increase repeat purchases by 31% within 6 months.
-                        </p>
-                        <div className="flex items-center space-x-3">
-                          <Button variant="outline" size="sm" className="bg-white/60 backdrop-blur-sm">
-                            <Users className="w-4 h-4 mr-2" />
-                            Plan Program
-                          </Button>
-                          <Badge className="bg-purple-100 text-purple-700">High Impact</Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200/60 shadow-lg">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Package className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-bold mb-3 text-slate-800">Inventory Optimization</h4>
-                        <p className="text-slate-600 mb-4 leading-relaxed">
-                          5 products are consistently out of stock during peak demand. Adjusting reorder points could
-                          prevent 89% of stockouts and increase revenue by ZMW 15,000 monthly.
-                        </p>
-                        <div className="flex items-center space-x-3">
-                          <Button variant="outline" size="sm" className="bg-white/60 backdrop-blur-sm">
-                            <Package className="w-4 h-4 mr-2" />
-                            Optimize Stock
-                          </Button>
-                          <Badge className="bg-amber-100 text-amber-700">Critical</Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Demo Information & Business Growth */}
-              <div className="space-y-6">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
-                    <Briefcase className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                    Business Growth
-                  </h3>
-                </div>
-
-                <Card className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-blue-200/60 shadow-lg">
-                  <CardContent className="p-6">
-                    <h4 className="text-lg font-bold mb-4 text-slate-800 flex items-center space-x-2">
-                      <Zap className="w-5 h-5 text-blue-600" />
-                      <span>What You're Experiencing</span>
-                    </h4>
-                    <div className="space-y-4 text-slate-700">
-                      <div className="flex items-start space-x-3">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Real-time business analytics with AI-powered insights</span>
-                      </div>
-                      <div className="flex items-start space-x-3">
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Interactive charts and comprehensive performance metrics</span>
-                      </div>
-                      <div className="flex items-start space-x-3">
-                        <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Advanced financial tracking and profit optimization</span>
-                      </div>
-                      <div className="flex items-start space-x-3">
-                        <div className="w-2 h-2 bg-amber-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Complete business management suite for scaling</span>
-                      </div>
-                      <div className="flex items-start space-x-3">
-                        <div className="w-2 h-2 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Automated reporting and business intelligence</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white/60 backdrop-blur-sm border-slate-200/60 shadow-lg">
-                  <CardContent className="p-6">
-                    <h4 className="text-lg font-bold mb-4 text-slate-800 flex items-center space-x-2">
-                      <Award className="w-5 h-5 text-emerald-600" />
-                      <span>Growth Opportunities</span>
-                    </h4>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-xl">
-                        <div>
-                          <p className="font-semibold text-slate-800">Market Expansion</p>
-                          <p className="text-sm text-slate-600">3 new regions identified</p>
-                        </div>
-                        <Badge className="bg-emerald-100 text-emerald-700">+45% potential</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-3 bg-blue-50 rounded-xl">
-                        <div>
-                          <p className="font-semibold text-slate-800">Product Diversification</p>
-                          <p className="text-sm text-slate-600">12 trending categories</p>
-                        </div>
-                        <Badge className="bg-blue-100 text-blue-700">+28% revenue</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-3 bg-purple-50 rounded-xl">
-                        <div>
-                          <p className="font-semibold text-slate-800">Digital Marketing</p>
-                          <p className="text-sm text-slate-600">Untapped channels</p>
-                        </div>
-                        <Badge className="bg-purple-100 text-purple-700">+67% reach</Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-xl">
-                  <CardContent className="p-6">
-                    <h4 className="text-lg font-bold mb-4 flex items-center space-x-2">
-                      <Sparkles className="w-5 h-5 text-yellow-400" />
-                      <span>Ready to Scale Your Business?</span>
-                    </h4>
-                    <p className="text-slate-300 mb-6 leading-relaxed">
-                      Experience the full power of LINKA's business management platform with your own data and unlock
-                      unlimited growth potential.
-                    </p>
-                    <div className="space-y-3">
-                      <Button
-                        asChild
-                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                      >
-                        <Link href="/signup">
-                          <Zap className="w-4 h-4 mr-2" />
-                          Start Your Business Journey
-                        </Link>
-                      </Button>
-                      <Button
-                        asChild
-                        variant="outline"
-                        className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
-                      >
-                        <Link href="/contact">
-                          <Phone className="w-4 h-4 mr-2" />
-                          Schedule a Demo
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  )
-}
+                      <span className="text-slate-600">Format\
