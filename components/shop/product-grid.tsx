@@ -1,185 +1,218 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Star, ShoppingCart, Heart, Eye } from "lucide-react"
-import { getProducts, type Product } from "@/app/actions/product-actions"
-import Image from "next/image"
+import type { Product } from "@/app/actions/product-actions"
 
 interface ProductGridProps {
-  filters?: {
-    category?: string
-    search?: string
-    minPrice?: number
-    maxPrice?: number
-    featured?: boolean
-  }
+  products: Product[]
+  viewMode?: "grid" | "list"
 }
 
-export function ProductGrid({ filters }: ProductGridProps) {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export function ProductGrid({ products, viewMode = "grid" }: ProductGridProps) {
+  const [favorites, setFavorites] = useState<Set<string>>(new Set())
 
-  useEffect(() => {
-    async function fetchProducts() {
-      setLoading(true)
-      setError(null)
-
-      try {
-        const result = await getProducts(filters)
-
-        if (result.success) {
-          setProducts(result.data)
-        } else {
-          setError(result.error || "Failed to load products")
-        }
-      } catch (err) {
-        setError("An unexpected error occurred")
-        console.error("Error fetching products:", err)
-      } finally {
-        setLoading(false)
-      }
+  const toggleFavorite = (productId: string) => {
+    const newFavorites = new Set(favorites)
+    if (newFavorites.has(productId)) {
+      newFavorites.delete(productId)
+    } else {
+      newFavorites.add(productId)
     }
+    setFavorites(newFavorites)
+  }
 
-    fetchProducts()
-  }, [filters])
-
-  if (loading) {
+  if (products.length === 0) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {Array.from({ length: 8 }).map((_, index) => (
-          <Card key={index} className="overflow-hidden">
-            <div className="aspect-square">
-              <Skeleton className="w-full h-full" />
-            </div>
-            <CardContent className="p-4 space-y-2">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-full" />
-              <Skeleton className="h-3 w-2/3" />
-              <div className="flex items-center space-x-2">
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-4 w-12" />
+      <div className="text-center py-12">
+        <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+          <ShoppingCart className="w-12 h-12 text-gray-400" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
+        <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+      </div>
+    )
+  }
+
+  if (viewMode === "list") {
+    return (
+      <div className="space-y-4">
+        {products.map((product) => (
+          <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <div className="flex">
+              <div className="relative w-48 h-48 flex-shrink-0">
+                <Image src={product.image || "/placeholder.svg"} alt={product.name} fill className="object-cover" />
+                {product.originalPrice && <Badge className="absolute top-2 left-2 bg-red-500 text-white">Sale</Badge>}
+                {product.featured && (
+                  <Badge className="absolute top-2 right-2 bg-gradient-to-r from-orange-500 to-blue-600 text-white">
+                    Featured
+                  </Badge>
+                )}
               </div>
-            </CardContent>
-            <CardFooter className="p-4 pt-0">
-              <Skeleton className="h-10 w-full" />
-            </CardFooter>
+              <div className="flex-1 p-6">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <Badge variant="secondary" className="mb-2">
+                      {product.category}
+                    </Badge>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{product.name}</h3>
+                    <p className="text-gray-600 mb-4">{product.description}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => toggleFavorite(product.id)}
+                    className="text-gray-400 hover:text-red-500"
+                  >
+                    <Heart className={`w-5 h-5 ${favorites.has(product.id) ? "fill-red-500 text-red-500" : ""}`} />
+                  </Button>
+                </div>
+
+                <div className="flex items-center mb-4">
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-600 ml-2">
+                    {product.rating} ({product.reviews} reviews)
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-2xl font-bold text-gray-900">K{product.price.toLocaleString()}</span>
+                    {product.originalPrice && (
+                      <span className="text-lg text-gray-500 line-through">
+                        K{product.originalPrice.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/shop/product/${product.id}`}>
+                        <Eye className="w-4 h-4 mr-2" />
+                        View
+                      </Link>
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white"
+                    >
+                      <ShoppingCart className="w-4 h-4 mr-2" />
+                      Add to Cart
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </Card>
         ))}
       </div>
     )
   }
 
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-          <Eye className="w-8 h-8 text-red-600" />
-        </div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">Unable to load products</h3>
-        <p className="text-slate-600 mb-4">{error}</p>
-        <Button onClick={() => window.location.reload()} variant="outline">
-          Try Again
-        </Button>
-      </div>
-    )
-  }
-
-  if (products.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-          <ShoppingCart className="w-8 h-8 text-slate-400" />
-        </div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">No products found</h3>
-        <p className="text-slate-600">Try adjusting your search or filter criteria</p>
-      </div>
-    )
-  }
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {products.map((product) => (
         <Card
           key={product.id}
-          className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-slate-200"
+          className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur"
         >
-          <div className="relative aspect-square overflow-hidden bg-slate-50">
+          <div className="relative aspect-square overflow-hidden">
             <Image
               src={product.image || "/placeholder.svg"}
               alt={product.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             />
-            {product.featured && (
-              <Badge className="absolute top-3 left-3 bg-blue-600 hover:bg-blue-700">Featured</Badge>
-            )}
-            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <Button size="icon" variant="secondary" className="h-8 w-8 bg-white/90 hover:bg-white">
-                <Heart className="h-4 w-4" />
-              </Button>
-            </div>
-            {product.stock <= 10 && product.stock > 0 && (
-              <Badge variant="destructive" className="absolute bottom-3 left-3">
-                Only {product.stock} left
+            {product.originalPrice && (
+              <Badge className="absolute top-3 left-3 bg-red-500 text-white shadow-lg">
+                {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
               </Badge>
             )}
-            {product.stock === 0 && (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                <Badge variant="destructive" className="text-white">
-                  Out of Stock
-                </Badge>
-              </div>
+            {product.featured && (
+              <Badge className="absolute top-3 right-3 bg-gradient-to-r from-orange-500 to-blue-600 text-white shadow-lg">
+                Featured
+              </Badge>
             )}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="flex space-x-2">
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={() => toggleFavorite(product.id)}
+                  className="bg-white/90 hover:bg-white shadow-lg"
+                >
+                  <Heart
+                    className={`w-4 h-4 ${favorites.has(product.id) ? "fill-red-500 text-red-500" : "text-gray-600"}`}
+                  />
+                </Button>
+                <Button variant="secondary" size="icon" asChild className="bg-white/90 hover:bg-white shadow-lg">
+                  <Link href={`/shop/product/${product.id}`}>
+                    <Eye className="w-4 h-4 text-gray-600" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
           </div>
 
-          <CardContent className="p-4 space-y-3">
-            <div>
-              <h3 className="font-semibold text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors">
-                {product.name}
-              </h3>
-              <p className="text-sm text-slate-600 line-clamp-2 mt-1">{product.description}</p>
-            </div>
+          <CardContent className="p-4">
+            <Badge variant="secondary" className="mb-2 text-xs">
+              {product.category}
+            </Badge>
+            <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
+              {product.name}
+            </h3>
+            <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
 
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-1">
-                {Array.from({ length: 5 }).map((_, index) => (
+            <div className="flex items-center mb-3">
+              <div className="flex items-center">
+                {[...Array(5)].map((_, i) => (
                   <Star
-                    key={index}
-                    className={`h-4 w-4 ${
-                      index < Math.floor(product.rating) ? "text-yellow-400 fill-yellow-400" : "text-slate-300"
+                    key={i}
+                    className={`w-3 h-3 ${
+                      i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"
                     }`}
                   />
                 ))}
               </div>
-              <span className="text-sm text-slate-600">
-                {product.rating} ({product.reviews})
-              </span>
+              <span className="text-xs text-gray-600 ml-2">({product.reviews})</span>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-2xl font-bold text-slate-900">K{product.price.toFixed(2)}</span>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <span className="text-lg font-bold text-gray-900">K{product.price.toLocaleString()}</span>
+                {product.originalPrice && (
+                  <span className="text-sm text-gray-500 line-through">K{product.originalPrice.toLocaleString()}</span>
+                )}
               </div>
-              <Badge variant="secondary" className="text-xs">
-                {product.category}
-              </Badge>
+              {!product.inStock && (
+                <Badge variant="destructive" className="text-xs">
+                  Out of Stock
+                </Badge>
+              )}
             </div>
           </CardContent>
 
           <CardFooter className="p-4 pt-0">
             <Button
-              className="w-full"
-              disabled={product.stock === 0}
-              variant={product.stock === 0 ? "secondary" : "default"}
+              className="w-full bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+              disabled={!product.inStock}
             >
               <ShoppingCart className="w-4 h-4 mr-2" />
-              {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+              {product.inStock ? "Add to Cart" : "Out of Stock"}
             </Button>
           </CardFooter>
         </Card>
