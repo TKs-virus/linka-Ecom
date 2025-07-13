@@ -1133,4 +1133,30 @@ export default function RetailerDashboardDemo() {
                       <span className="text-slate-800 font-medium">6 hours ago</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">Format\
+                      <span className="text-slate-600">Format:</span>
+                      <span className="text-slate-800 font-medium">PDF, Excel</span>
+                    </div>
+                  </div>
+                  <Button className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white">
+                    Generate Report
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* —— Insights TAB (placeholder for future expansion) —— */}
+          <TabsContent value="insights" className="flex items-center justify-center py-24">
+            <div className="text-center space-y-4">
+              <PieChart className="mx-auto w-16 h-16 text-blue-400" />
+              <h3 className="text-xl font-semibold text-slate-800">Powerful Insights coming soon</h3>
+              <p className="text-slate-600">
+                We’re working hard to bring you advanced, AI-powered insights for your business.
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  )
+}
