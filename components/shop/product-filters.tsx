@@ -108,8 +108,8 @@ export function ProductFilters() {
         <CardContent className="space-y-4">
           <Slider value={priceRange} onValueChange={setPriceRange} max={500} step={10} className="w-full" />
           <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>${priceRange[0]}</span>
-            <span>${priceRange[1]}</span>
+            <span>ZMW {priceRange[0]}</span>
+            <span>ZMW {priceRange[1]}</span>
           </div>
         </CardContent>
       </Card>

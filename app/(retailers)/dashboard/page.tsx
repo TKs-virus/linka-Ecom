@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
@@ -12,17 +13,30 @@ import {
   ShoppingCart,
   Package,
   Users,
+  TrendingUp,
   Download,
   Plus,
+  Search,
   Calendar,
   Filter,
   Eye,
-  BarChart3,
-  Settings,
-  TrendingUp,
   Star,
+  Target,
+  BookOpen,
+  BarChart3,
+  FileText,
+  UserCheck,
+  Boxes,
+  Zap,
+  Sparkles,
+  Bell,
+  Settings,
+  Home,
+  ChevronRight,
 } from "lucide-react"
 import {
+  BarChart,
+  Bar,
   PieChart,
   Cell,
   XAxis,
@@ -30,12 +44,12 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
   Area,
   AreaChart,
   Pie,
-  BarChart,
-  Bar,
 } from "recharts"
+import Link from "next/link"
 
 // Mock data for charts
 const revenueData = [
@@ -48,20 +62,20 @@ const revenueData = [
 ]
 
 const salesDistributionData = [
-  { name: "Electronics", value: 35, amount: 76300, color: "#4F46E5", trend: "+18.2%" },
-  { name: "Fashion", value: 28, amount: 61040, color: "#10B981", trend: "+12.8%" },
-  { name: "Home & Garden", value: 18, amount: 39240, color: "#F59E0B", trend: "+24.5%" },
-  { name: "Sports & Fitness", value: 12, amount: 26160, color: "#EF4444", trend: "+8.7%" },
-  { name: "Books & Media", value: 7, amount: 15260, color: "#8B5CF6", trend: "+15.3%" },
+  { name: "Electronics", value: 35, amount: 76300, color: "#3B82F6", trend: "+12%" },
+  { name: "Fashion", value: 28, amount: 61040, color: "#10B981", trend: "+8%" },
+  { name: "Home & Garden", value: 18, amount: 39240, color: "#F59E0B", trend: "+15%" },
+  { name: "Sports & Fitness", value: 12, amount: 26160, color: "#8B5CF6", trend: "+5%" },
+  { name: "Books & Media", value: 7, amount: 15260, color: "#EF4444", trend: "+3%" },
 ]
 
 const performanceData = [
-  { month: "Jan", orders: 320, customers: 189 },
-  { month: "Feb", orders: 380, customers: 234 },
-  { month: "Mar", orders: 340, customers: 198 },
-  { month: "Apr", orders: 420, customers: 267 },
-  { month: "May", orders: 480, customers: 298 },
-  { month: "Jun", orders: 520, customers: 312 },
+  { month: "Jan", orders: 320, customers: 189, revenue: 145 },
+  { month: "Feb", orders: 380, customers: 234, revenue: 162 },
+  { month: "Mar", orders: 340, customers: 198, revenue: 158 },
+  { month: "Apr", orders: 420, customers: 267, revenue: 175 },
+  { month: "May", orders: 480, customers: 298, revenue: 195 },
+  { month: "Jun", orders: 520, customers: 312, revenue: 220 },
 ]
 
 const recentOrders = [
@@ -72,7 +86,7 @@ const recentOrders = [
     items: 3,
     amount: 459.99,
     status: "Delivered",
-    statusColor: "bg-green-100 text-green-800",
+    statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
     time: "2 hours ago",
   },
   {
@@ -82,7 +96,7 @@ const recentOrders = [
     items: 2,
     amount: 289.5,
     status: "Processing",
-    statusColor: "bg-blue-100 text-blue-800",
+    statusColor: "bg-blue-50 text-blue-700 border-blue-200",
     time: "4 hours ago",
   },
   {
@@ -92,7 +106,7 @@ const recentOrders = [
     items: 1,
     amount: 129.99,
     status: "Shipped",
-    statusColor: "bg-yellow-100 text-yellow-800",
+    statusColor: "bg-amber-50 text-amber-700 border-amber-200",
     time: "6 hours ago",
   },
   {
@@ -102,18 +116,8 @@ const recentOrders = [
     items: 4,
     amount: 699.99,
     status: "Pending",
-    statusColor: "bg-orange-100 text-orange-800",
+    statusColor: "bg-orange-50 text-orange-700 border-orange-200",
     time: "8 hours ago",
-  },
-  {
-    id: "ORD-2024-005",
-    customer: "Emma Thompson",
-    avatar: "ET",
-    items: 2,
-    amount: 189.99,
-    status: "Cancelled",
-    statusColor: "bg-red-100 text-red-800",
-    time: "1 day ago",
   },
 ]
 
@@ -125,7 +129,8 @@ const topProducts = [
     sales: 1847,
     revenue: 258580,
     growth: "+18.2%",
-    growthColor: "text-green-600",
+    growthColor: "text-emerald-600",
+    image: "/placeholder.svg?height=40&width=40&text=🎧",
   },
   {
     rank: 2,
@@ -134,7 +139,8 @@ const topProducts = [
     sales: 1523,
     revenue: 456900,
     growth: "+12.8%",
-    growthColor: "text-green-600",
+    growthColor: "text-emerald-600",
+    image: "/placeholder.svg?height=40&width=40&text=⌚",
   },
   {
     rank: 3,
@@ -143,7 +149,8 @@ const topProducts = [
     sales: 892,
     revenue: 178400,
     growth: "+24.5%",
-    growthColor: "text-green-600",
+    growthColor: "text-emerald-600",
+    image: "/placeholder.svg?height=40&width=40&text=🪑",
   },
   {
     rank: 4,
@@ -152,266 +159,254 @@ const topProducts = [
     sales: 634,
     revenue: 190200,
     growth: "+8.7%",
-    growthColor: "text-green-600",
-  },
-  {
-    rank: 5,
-    name: "Designer Backpack",
-    category: "Fashion",
-    sales: 1205,
-    revenue: 96400,
-    growth: "+15.3%",
-    growthColor: "text-green-600",
+    growthColor: "text-emerald-600",
+    image: "/placeholder.svg?height=40&width=40&text=📷",
   },
 ]
 
-const keyMetrics = [
-  {
-    title: "Conversion Rate",
-    value: "4.2%",
-    change: "+0.8% from last month",
-    changeColor: "text-green-600",
-    progress: 84,
-  },
-  {
-    title: "Customer Satisfaction",
-    value: "4.9/5",
-    change: "Excellent rating",
-    changeColor: "text-green-600",
-    progress: 98,
-  },
-  {
-    title: "Return Rate",
-    value: "1.8%",
-    change: "-0.3% improvement",
-    changeColor: "text-green-600",
-    progress: 18,
-  },
-  {
-    title: "Avg Order Value",
-    value: "ZMW 448",
-    change: "+ZMW 23 increase",
-    changeColor: "text-green-600",
-    progress: 75,
-  },
-]
-
-const businessInsights = [
-  {
-    type: "success",
-    title: "Exceptional Growth",
-    description:
-      "Revenue increased by 28.4% this month, driven by strong electronics sales and improved customer retention.",
-    icon: TrendingUp,
-    bgColor: "bg-green-50",
-    iconColor: "text-green-600",
-  },
-  {
-    type: "info",
-    title: "Category Leader",
-    description: "Electronics category dominates with 35% market share and highest profit margins in your portfolio.",
-    icon: Star,
-    bgColor: "bg-blue-50",
-    iconColor: "text-blue-600",
-  },
-  {
-    type: "warning",
-    title: "Inventory Alert",
-    description: "5 high-demand products are running low. Consider restocking to avoid missed sales opportunities.",
-    icon: Package,
-    bgColor: "bg-yellow-50",
-    iconColor: "text-yellow-600",
-  },
-]
-
-const strategicRecommendations = [
-  {
-    title: "Optimize Product Listings",
-    description:
-      "Enhance product descriptions and images for top-performing items to boost conversion rates by an estimated 15%.",
-    action: "Learn More",
-  },
-  {
-    title: "Expand Marketing Reach",
-    description:
-      "Increase advertising spend for electronics category to capitalize on high-performing products and market demand.",
-    action: "Learn More",
-  },
-  {
-    title: "Customer Loyalty Program",
-    description: "Implement a rewards system to increase repeat purchases and improve customer lifetime value by 25%.",
-    action: "Learn More",
-  },
-]
-
-export default function RetailerDashboard() {
+export default function RetailerDashboardDemo() {
   const [activeTab, setActiveTab] = useState("overview")
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [currentTime, setCurrentTime] = useState(new Date())
 
-  const handleRefresh = () => {
-    setIsLoading(true)
-    setTimeout(() => setIsLoading(false), 1000)
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1000)
+    const timeInterval = setInterval(() => setCurrentTime(new Date()), 1000)
+
+    return () => {
+      clearTimeout(timer)
+      clearInterval(timeInterval)
+    }
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center space-y-6">
+          <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl flex items-center justify-center animate-pulse shadow-2xl">
+            <BarChart3 className="w-10 h-10 text-white" />
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-3xl font-bold text-slate-800">Loading Dashboard</h2>
+            <p className="text-slate-600 font-medium">Preparing your business insights...</p>
+          </div>
+          <div className="w-64 h-2 bg-slate-200 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse w-3/4"></div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-            <p className="text-gray-600">Welcome back! Here's your business performance at a glance.</p>
+    <div className="min-h-screen bg-slate-50">
+      {/* Modern Header */}
+      <div className="bg-white border-b border-slate-200 shadow-sm">
+        <div className="flex items-center justify-between px-8 py-4">
+          <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-800">LINKA</h1>
+                <p className="text-sm text-slate-600 font-medium">Business Dashboard</p>
+              </div>
+            </div>
+
+            {/* Breadcrumb */}
+            <div className="hidden lg:flex items-center space-x-2 text-sm text-slate-600">
+              <Link href="/" className="hover:text-blue-600 transition-colors">
+                Home
+              </Link>
+              <ChevronRight className="w-4 h-4" />
+              <span className="text-slate-800 font-medium">Dashboard</span>
+            </div>
           </div>
-          <div className="flex items-center space-x-3">
-            <Button variant="outline" onClick={handleRefresh} disabled={isLoading}>
-              <Download className="w-4 h-4 mr-2" />
-              Export Data
-            </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="w-4 h-4 mr-2" />
-              New Order
-            </Button>
+
+          <div className="flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-3 bg-slate-100 rounded-xl px-4 py-2 min-w-80">
+              <Search className="w-4 h-4 text-slate-500" />
+              <Input
+                placeholder="Search orders, products, customers..."
+                className="border-0 bg-transparent text-slate-700 placeholder:text-slate-500 focus-visible:ring-0 font-medium"
+              />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" size="icon" className="text-slate-600 hover:bg-slate-100">
+                <Bell className="w-5 h-5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="text-slate-600 hover:bg-slate-100">
+                <Settings className="w-5 h-5" />
+              </Button>
+              <Button
+                asChild
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold"
+              >
+                <Link href="/">
+                  <Home className="w-4 h-4 mr-2" />
+                  Back to Home
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 max-w-md bg-white border border-gray-200">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+      {/* Main Content - Landscape Layout */}
+      <div className="p-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-800 mb-2">Dashboard Overview</h1>
+              <p className="text-slate-600">Welcome back! Here's what's happening with your business today.</p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Button variant="outline" className="bg-white border-slate-300 text-slate-700 hover:bg-slate-50">
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                New Order
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <TabsList className="grid w-full grid-cols-4 max-w-md bg-white border border-slate-200 shadow-sm">
+            <TabsTrigger
+              value="overview"
+              className="font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
               Overview
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <TabsTrigger
+              value="analytics"
+              className="font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
               Analytics
             </TabsTrigger>
-            <TabsTrigger value="reports" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <TabsTrigger
+              value="reports"
+              className="font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
               Reports
             </TabsTrigger>
-            <TabsTrigger value="insights" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <TabsTrigger
+              value="insights"
+              className="font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
               Insights
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
-            {/* Key Metrics Cards */}
+          <TabsContent value="overview" className="space-y-8">
+            {/* Key Metrics - Landscape Layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-white border-0 shadow-sm">
+              <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <DollarSign className="w-6 h-6 text-green-600" />
+                    <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                      <DollarSign className="w-6 h-6 text-emerald-600" />
                     </div>
+                    <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">+28.4%</Badge>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                    <p className="text-3xl font-bold text-gray-900">ZMW 1,108,000</p>
-                    <div className="flex items-center text-sm">
-                      <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
-                      <span className="text-green-600 font-medium">+28.4%</span>
-                      <span className="text-gray-500 ml-1">vs last month</span>
-                    </div>
-                    <Progress value={85} className="h-2 bg-gray-100" />
+                    <p className="text-sm font-medium text-slate-600">Total Revenue</p>
+                    <p className="text-2xl font-bold text-slate-800">ZMW 1,108,000</p>
+                    <Progress value={85} className="h-2" />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white border-0 shadow-sm">
+              <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                       <ShoppingCart className="w-6 h-6 text-blue-600" />
                     </div>
+                    <Badge className="bg-blue-50 text-blue-700 border-blue-200">+15.2%</Badge>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                    <p className="text-3xl font-bold text-gray-900">2,472</p>
-                    <div className="flex items-center text-sm">
-                      <TrendingUp className="w-4 h-4 text-blue-600 mr-1" />
-                      <span className="text-blue-600 font-medium">+15.2%</span>
-                      <span className="text-gray-500 ml-1">23 pending</span>
-                    </div>
-                    <Progress value={75} className="h-2 bg-gray-100" />
+                    <p className="text-sm font-medium text-slate-600">Total Orders</p>
+                    <p className="text-2xl font-bold text-slate-800">2,472</p>
+                    <Progress value={75} className="h-2" />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white border-0 shadow-sm">
+              <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                      <Package className="w-6 h-6 text-orange-600" />
+                    <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                      <Package className="w-6 h-6 text-amber-600" />
                     </div>
+                    <Badge className="bg-amber-50 text-amber-700 border-amber-200">+8.7%</Badge>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-600">Active Products</p>
-                    <p className="text-3xl font-bold text-gray-900">3,847</p>
-                    <div className="flex items-center text-sm">
-                      <TrendingUp className="w-4 h-4 text-orange-600 mr-1" />
-                      <span className="text-orange-600 font-medium">+8.7%</span>
-                      <span className="text-gray-500 ml-1">5 low stock</span>
-                    </div>
-                    <Progress value={90} className="h-2 bg-gray-100" />
+                    <p className="text-sm font-medium text-slate-600">Active Products</p>
+                    <p className="text-2xl font-bold text-slate-800">3,847</p>
+                    <Progress value={90} className="h-2" />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white border-0 shadow-sm">
+              <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                       <Users className="w-6 h-6 text-purple-600" />
                     </div>
+                    <Badge className="bg-purple-50 text-purple-700 border-purple-200">+12.8%</Badge>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-600">Total Customers</p>
-                    <p className="text-3xl font-bold text-gray-900">12,429</p>
-                    <div className="flex items-center text-sm">
-                      <TrendingUp className="w-4 h-4 text-purple-600 mr-1" />
-                      <span className="text-purple-600 font-medium">+12.8%</span>
-                      <span className="text-gray-500 ml-1">325 new</span>
-                    </div>
-                    <Progress value={80} className="h-2 bg-gray-100" />
+                    <p className="text-sm font-medium text-slate-600">Total Customers</p>
+                    <p className="text-2xl font-bold text-slate-800">12,429</p>
+                    <Progress value={80} className="h-2" />
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Revenue Analytics */}
-              <Card className="lg:col-span-2 bg-white border-0 shadow-sm">
+            {/* Charts Section - Landscape Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Revenue Analytics - Takes 2 columns */}
+              <Card className="lg:col-span-2 bg-white border-slate-200 shadow-sm">
                 <CardHeader className="flex flex-row items-center justify-between pb-4">
                   <div>
-                    <CardTitle className="text-xl font-bold text-gray-900">Revenue Analytics</CardTitle>
-                    <CardDescription className="text-gray-600">Monthly performance and growth trends</CardDescription>
+                    <CardTitle className="text-xl font-bold text-slate-800">Revenue Analytics</CardTitle>
+                    <CardDescription className="text-slate-600">Monthly performance trends</CardDescription>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="bg-white">
                       <Calendar className="w-4 h-4 mr-2" />
                       6M
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="bg-white">
                       <Filter className="w-4 h-4" />
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={350}>
                     <AreaChart data={revenueData}>
                       <defs>
                         <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#4F46E5" stopOpacity={0.05} />
+                          <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.05} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
-                      <XAxis dataKey="month" stroke="#6B7280" fontSize={12} />
-                      <YAxis stroke="#6B7280" fontSize={12} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                      <XAxis dataKey="month" stroke="#64748B" fontSize={12} />
+                      <YAxis stroke="#64748B" fontSize={12} />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "white",
-                          border: "1px solid #E5E7EB",
+                          border: "1px solid #E2E8F0",
                           borderRadius: "8px",
                           boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                         }}
@@ -419,8 +414,8 @@ export default function RetailerDashboard() {
                       <Area
                         type="monotone"
                         dataKey="revenue"
-                        stroke="#4F46E5"
-                        strokeWidth={3}
+                        stroke="#3B82F6"
+                        strokeWidth={2}
                         fill="url(#revenueGradient)"
                       />
                     </AreaChart>
@@ -428,11 +423,11 @@ export default function RetailerDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Sales Distribution */}
-              <Card className="bg-white border-0 shadow-sm">
+              {/* Sales Distribution - Takes 1 column */}
+              <Card className="bg-white border-slate-200 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl font-bold text-gray-900">Sales Distribution</CardTitle>
-                  <CardDescription className="text-gray-600">Revenue by product category</CardDescription>
+                  <CardTitle className="text-xl font-bold text-slate-800">Sales Distribution</CardTitle>
+                  <CardDescription className="text-slate-600">By category</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-center mb-6">
@@ -457,15 +452,14 @@ export default function RetailerDashboard() {
                     </ResponsiveContainer>
                   </div>
                   <div className="space-y-3">
-                    {salesDistributionData.map((item, index) => (
+                    {salesDistributionData.slice(0, 3).map((item, index) => (
                       <div key={index} className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                          <span className="text-sm font-medium text-gray-700">{item.name}</span>
+                          <span className="text-sm font-medium text-slate-700">{item.name}</span>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold text-gray-900">{item.value}%</p>
-                          <p className="text-xs text-gray-500">ZMW {item.amount.toLocaleString()}</p>
+                          <p className="text-sm font-bold text-slate-800">{item.value}%</p>
                         </div>
                       </div>
                     ))}
@@ -474,16 +468,16 @@ export default function RetailerDashboard() {
               </Card>
             </div>
 
-            {/* Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Recent Activity - Landscape Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Recent Orders */}
-              <Card className="bg-white border-0 shadow-sm">
+              <Card className="bg-white border-slate-200 shadow-sm">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="text-xl font-bold text-gray-900">Recent Orders</CardTitle>
-                    <CardDescription className="text-gray-600">Latest customer transactions</CardDescription>
+                    <CardTitle className="text-xl font-bold text-slate-800">Recent Orders</CardTitle>
+                    <CardDescription className="text-slate-600">Latest transactions</CardDescription>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-gray-600 hover:bg-gray-100">
+                  <Button variant="ghost" size="sm" className="text-slate-600 hover:bg-slate-100">
                     <Eye className="w-4 h-4 mr-2" />
                     View All
                   </Button>
@@ -491,7 +485,10 @@ export default function RetailerDashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     {recentOrders.map((order, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
+                      >
                         <div className="flex items-center space-x-4">
                           <Avatar className="w-10 h-10">
                             <AvatarFallback className="bg-blue-100 text-blue-700 font-bold text-sm">
@@ -499,15 +496,15 @@ export default function RetailerDashboard() {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium text-gray-900">{order.customer}</p>
-                            <p className="text-sm text-gray-500">
+                            <p className="font-medium text-slate-800">{order.customer}</p>
+                            <p className="text-sm text-slate-600">
                               {order.id} • {order.items} items
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-gray-900">ZMW {order.amount}</p>
-                          <Badge className={`text-xs ${order.statusColor}`}>{order.status}</Badge>
+                          <Badge className={`${order.statusColor} text-xs`}>{order.status}</Badge>
+                          <p className="text-sm font-bold text-slate-800 mt-1">ZMW {order.amount}</p>
                         </div>
                       </div>
                     ))}
@@ -516,13 +513,13 @@ export default function RetailerDashboard() {
               </Card>
 
               {/* Top Products */}
-              <Card className="bg-white border-0 shadow-sm">
+              <Card className="bg-white border-slate-200 shadow-sm">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="text-xl font-bold text-gray-900">Top Products</CardTitle>
-                    <CardDescription className="text-gray-600">Best performing items</CardDescription>
+                    <CardTitle className="text-xl font-bold text-slate-800">Top Products</CardTitle>
+                    <CardDescription className="text-slate-600">Best performers</CardDescription>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-gray-600 hover:bg-gray-100">
+                  <Button variant="ghost" size="sm" className="text-slate-600 hover:bg-slate-100">
                     <Star className="w-4 h-4 mr-2" />
                     View All
                   </Button>
@@ -530,21 +527,24 @@ export default function RetailerDashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     {topProducts.map((product, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
+                      >
                         <div className="flex items-center space-x-4">
-                          <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg flex items-center justify-center font-bold text-sm">
                             {product.rank}
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">{product.name}</p>
-                            <p className="text-sm text-gray-500">
+                            <p className="font-medium text-slate-800">{product.name}</p>
+                            <p className="text-sm text-slate-600">
                               {product.category} • {product.sales} sales
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-gray-900">ZMW {product.revenue.toLocaleString()}</p>
-                          <p className={`text-sm ${product.growthColor}`}>{product.growth}</p>
+                          <p className="font-bold text-slate-800">ZMW {product.revenue.toLocaleString()}</p>
+                          <p className={`text-sm font-bold ${product.growthColor}`}>{product.growth}</p>
                         </div>
                       </div>
                     ))}
@@ -554,160 +554,229 @@ export default function RetailerDashboard() {
             </div>
           </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <TabsContent value="analytics" className="space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
               {/* Performance Analytics */}
-              <Card className="lg:col-span-2 bg-white border-0 shadow-sm">
+              <Card className="lg:col-span-3 bg-white border-slate-200 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl font-bold text-gray-900">Performance Analytics</CardTitle>
-                  <CardDescription className="text-gray-600">Comprehensive business metrics and trends</CardDescription>
+                  <CardTitle className="text-xl font-bold text-slate-800">Performance Analytics</CardTitle>
+                  <CardDescription className="text-slate-600">Comprehensive business metrics</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={350}>
+                  <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={performanceData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
-                      <XAxis dataKey="month" stroke="#6B7280" fontSize={12} />
-                      <YAxis stroke="#6B7280" fontSize={12} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                      <XAxis dataKey="month" stroke="#64748B" fontSize={12} />
+                      <YAxis stroke="#64748B" fontSize={12} />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "white",
-                          border: "1px solid #E5E7EB",
+                          border: "1px solid #E2E8F0",
                           borderRadius: "8px",
                           boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                         }}
                       />
-                      <Bar dataKey="orders" fill="#4F46E5" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="customers" fill="#10B981" radius={[4, 4, 0, 0]} />
+                      <Legend />
+                      <Bar dataKey="orders" fill="#3B82F6" name="Orders" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="customers" fill="#10B981" name="Customers" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="revenue" fill="#F59E0B" name="Revenue (K)" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
 
               {/* Key Metrics */}
-              <Card className="bg-white border-0 shadow-sm">
+              <Card className="bg-white border-slate-200 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl font-bold text-gray-900">Key Metrics</CardTitle>
+                  <CardTitle className="text-xl font-bold text-slate-800">Key Metrics</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {keyMetrics.map((metric, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-gray-600">{metric.title}</p>
-                          <p className="text-lg font-bold text-gray-900">{metric.value}</p>
-                        </div>
-                        <Progress value={metric.progress} className="h-2 bg-gray-100" />
-                        <p className={`text-xs ${metric.changeColor}`}>{metric.change}</p>
-                      </div>
-                    ))}
+                <CardContent className="space-y-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-600">Conversion Rate</span>
+                      <span className="text-lg font-bold text-slate-800">4.2%</span>
+                    </div>
+                    <Progress value={42} className="h-2" />
+                    <p className="text-xs text-emerald-600 font-medium">+0.8% from last month</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-600">Customer Satisfaction</span>
+                      <span className="text-lg font-bold text-slate-800">4.9/5</span>
+                    </div>
+                    <Progress value={98} className="h-2" />
+                    <p className="text-xs text-emerald-600 font-medium">Excellent rating</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-600">Return Rate</span>
+                      <span className="text-lg font-bold text-slate-800">1.8%</span>
+                    </div>
+                    <Progress value={18} className="h-2" />
+                    <p className="text-xs text-emerald-600 font-medium">-0.3% improvement</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-600">Avg Order Value</span>
+                      <span className="text-lg font-bold text-slate-800">ZMW 448</span>
+                    </div>
+                    <Progress value={75} className="h-2" />
+                    <p className="text-xs text-emerald-600 font-medium">+ZMW 23 increase</p>
                   </div>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
-          <TabsContent value="reports" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="bg-blue-50 border-0 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mb-4">
-                    <BarChart3 className="w-6 h-6 text-white" />
+          <TabsContent value="reports" className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+                <CardContent className="p-8">
+                  <div className="flex items-center space-x-4 mb-6">
+                    <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center">
+                      <FileText className="w-7 h-7 text-blue-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800">Sales Report</h3>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Sales Report</h3>
-                  <p className="text-gray-600 text-sm mb-4">
-                    Comprehensive sales analysis with revenue breakdowns, product performance, and growth metrics.
+                  <p className="text-slate-600 mb-6 leading-relaxed">
+                    Comprehensive sales analysis with revenue breakdowns and performance metrics.
                   </p>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700">Generate Report</Button>
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">Generate Report</Button>
                 </CardContent>
               </Card>
 
-              <Card className="bg-green-50 border-0 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mb-4">
-                    <Users className="w-6 h-6 text-white" />
+              <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+                <CardContent className="p-8">
+                  <div className="flex items-center space-x-4 mb-6">
+                    <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center">
+                      <UserCheck className="w-7 h-7 text-emerald-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800">Customer Report</h3>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Customer Report</h3>
-                  <p className="text-gray-600 text-sm mb-4">
-                    Customer behavior analysis, demographics insights, and retention metrics for strategic planning.
+                  <p className="text-slate-600 mb-6 leading-relaxed">
+                    Customer behavior analysis and retention metrics for strategic planning.
                   </p>
-                  <Button className="w-full bg-green-600 hover:bg-green-700">Generate Report</Button>
+                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">Generate Report</Button>
                 </CardContent>
               </Card>
 
-              <Card className="bg-orange-50 border-0 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center mb-4">
-                    <Package className="w-6 h-6 text-white" />
+              <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+                <CardContent className="p-8">
+                  <div className="flex items-center space-x-4 mb-6">
+                    <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center">
+                      <Boxes className="w-7 h-7 text-amber-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800">Inventory Report</h3>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Inventory Report</h3>
-                  <p className="text-gray-600 text-sm mb-4">
-                    Stock levels, inventory turnover, and supply chain optimization recommendations.
+                  <p className="text-slate-600 mb-6 leading-relaxed">
+                    Stock levels and supply chain optimization recommendations.
                   </p>
-                  <Button className="w-full bg-orange-600 hover:bg-orange-700">Generate Report</Button>
+                  <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white">Generate Report</Button>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
-          <TabsContent value="insights" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TabsContent value="insights" className="space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Business Insights */}
-              <Card className="bg-white border-0 shadow-sm">
-                <CardHeader>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-xl font-bold text-gray-900">Business Insights</CardTitle>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {businessInsights.map((insight, index) => (
-                      <div key={index} className={`p-4 rounded-lg ${insight.bgColor}`}>
-                        <div className="flex items-start space-x-3">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${insight.bgColor}`}>
-                            <insight.icon className={`w-4 h-4 ${insight.iconColor}`} />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900 mb-1">{insight.title}</h4>
-                            <p className="text-sm text-gray-600">{insight.description}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="space-y-6">
+                <h3 className="text-2xl font-bold flex items-center text-slate-800">
+                  <Target className="w-6 h-6 mr-3 text-blue-600" />
+                  Strategic Recommendations
+                </h3>
 
-              {/* Strategic Recommendations */}
-              <Card className="bg-white border-0 shadow-sm">
-                <CardHeader>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                      <Settings className="w-5 h-5 text-orange-600" />
+                <Card className="bg-white border-slate-200 shadow-sm">
+                  <CardContent className="p-6">
+                    <h4 className="text-lg font-bold mb-3 text-slate-800">Optimize Product Listings</h4>
+                    <p className="text-slate-600 mb-4 leading-relaxed">
+                      Enhance product descriptions and images for top-performing items to boost conversion rates.
+                    </p>
+                    <Button variant="outline" size="sm" className="bg-white">
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      Learn More
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white border-slate-200 shadow-sm">
+                  <CardContent className="p-6">
+                    <h4 className="text-lg font-bold mb-3 text-slate-800">Expand Marketing Reach</h4>
+                    <p className="text-slate-600 mb-4 leading-relaxed">
+                      Increase advertising spend for electronics category to capitalize on market demand.
+                    </p>
+                    <Button variant="outline" size="sm" className="bg-white">
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      Learn More
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white border-slate-200 shadow-sm">
+                  <CardContent className="p-6">
+                    <h4 className="text-lg font-bold mb-3 text-slate-800">Customer Loyalty Program</h4>
+                    <p className="text-slate-600 mb-4 leading-relaxed">
+                      Implement a rewards system to increase repeat purchases and customer lifetime value.
+                    </p>
+                    <Button variant="outline" size="sm" className="bg-white">
+                      <Users className="w-4 h-4 mr-2" />
+                      Learn More
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Demo Information */}
+              <div className="space-y-6">
+                <h3 className="text-2xl font-bold flex items-center text-slate-800">
+                  <Sparkles className="w-6 h-6 mr-3 text-purple-600" />
+                  About This Demo
+                </h3>
+
+                <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200 shadow-sm">
+                  <CardContent className="p-6">
+                    <h4 className="text-lg font-bold mb-3 text-slate-800">What You're Seeing</h4>
+                    <div className="space-y-3 text-slate-700">
+                      <p className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                        <span>Real-time analytics with sample business data</span>
+                      </p>
+                      <p className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                        <span>Interactive charts and performance metrics</span>
+                      </p>
+                      <p className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                        <span>AI-powered business insights</span>
+                      </p>
+                      <p className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                        <span>Complete dashboard functionality</span>
+                      </p>
                     </div>
-                    <div>
-                      <CardTitle className="text-xl font-bold text-gray-900">Strategic Recommendations</CardTitle>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white border-slate-200 shadow-sm">
+                  <CardContent className="p-6">
+                    <h4 className="text-lg font-bold mb-3 text-slate-800">Ready to Get Started?</h4>
+                    <p className="text-slate-600 mb-4">
+                      Experience the full power of LINKA's business management platform with your own data.
+                    </p>
+                    <div className="space-y-3">
+                      <Button asChild className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                        <Link href="/signup">Create Your Account</Link>
+                      </Button>
+                      <Button asChild variant="outline" className="w-full bg-white">
+                        <Link href="/contact">Contact Sales</Link>
+                      </Button>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {strategicRecommendations.map((recommendation, index) => (
-                      <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0">
-                        <h4 className="font-semibold text-gray-900 mb-2">{recommendation.title}</h4>
-                        <p className="text-sm text-gray-600 mb-3">{recommendation.description}</p>
-                        <Button variant="outline" size="sm">
-                          {recommendation.action}
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

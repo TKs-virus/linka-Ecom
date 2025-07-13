@@ -46,11 +46,11 @@ export function ProfileForm() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="firstName">First Name</Label>
-          <Input id="firstName" name="firstName" type="text" defaultValue="John" required />
+          <Input id="firstName" name="firstName" defaultValue="John" required />
         </div>
         <div className="space-y-2">
           <Label htmlFor="lastName">Last Name</Label>
-          <Input id="lastName" name="lastName" type="text" defaultValue="Doe" required />
+          <Input id="lastName" name="lastName" defaultValue="Doe" required />
         </div>
       </div>
 

@@ -1,5 +1,4 @@
 "use client"
-
 import { useActionState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 
@@ -9,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { loginUser, type AuthState } from "@/app/actions/auth-actions"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertTriangle, Play, BarChart3 } from "lucide-react"
+import Link from "next/link"
 
 const initialState: AuthState = {
   message: "",
@@ -27,16 +27,19 @@ export function LoginForm() {
   }, [state, router])
 
   const handleDemoLogin = async () => {
-    // Redirect directly to dashboard for demo
-    router.push("/dashboard")
+    const formData = new FormData()
+    formData.append("email", "demo@example.com")
+    formData.append("password", "demo")
+    // Directly invoke the server action
+    await (formAction as (payload: FormData) => Promise<void>)(formData)
   }
 
   return (
     <div className="space-y-6">
       {/* Demo Access - Prominent */}
-      <div className="bg-gradient-to-r from-sky-50 to-sky-100 rounded-xl p-4 border border-sky-200">
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200">
         <div className="flex items-center space-x-3 mb-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-sky-500 to-sky-600 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
             <BarChart3 className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -45,11 +48,13 @@ export function LoginForm() {
           </div>
         </div>
         <Button
-          onClick={handleDemoLogin}
-          className="w-full bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold shadow-lg"
+          asChild
+          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold shadow-lg"
         >
-          <Play className="w-4 h-4 mr-2" />
-          Launch Demo Dashboard
+          <Link href="/dashboard">
+            <Play className="w-4 h-4 mr-2" />
+            Launch Demo Dashboard
+          </Link>
         </Button>
       </div>
 

@@ -17,19 +17,28 @@ export function MainNav() {
   ]
 
   return (
-    <header className="sticky top-0 z-30 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm ml-80">
+    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm">
       <div className="container flex h-16 items-center justify-between px-4">
-        {/* Logo - Hidden on desktop since it's in sidebar */}
-        <Link href="/" className="flex items-center space-x-2 md:hidden">
+        {/* Logo */}
+        <Link href="/" className="flex items-center space-x-2">
           <ShoppingBag className="h-8 w-8 text-primary" />
           <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Linka
           </span>
         </Link>
 
-        {/* Desktop Navigation - Hidden since we have sidebar */}
-        <nav className="hidden lg:flex items-center space-x-6">
-          <div className="text-lg font-semibold text-slate-700">Business Management Platform</div>
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-6">
+          {navigation.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className="text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors flex items-center space-x-1"
+            >
+              <item.icon className="w-4 h-4" />
+              <span>{item.name}</span>
+            </Link>
+          ))}
         </nav>
 
         {/* Desktop Actions */}
