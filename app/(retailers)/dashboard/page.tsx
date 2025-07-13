@@ -58,7 +58,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
   Area,
   AreaChart,
   Pie,
@@ -613,7 +612,6 @@ export default function RetailerDashboardDemo() {
                           backdropFilter: "blur(10px)",
                         }}
                       />
-                      <Legend />
                       <Area
                         type="monotone"
                         dataKey="revenue"
@@ -828,7 +826,6 @@ export default function RetailerDashboardDemo() {
                           backdropFilter: "blur(10px)",
                         }}
                       />
-                      <Legend />
                       <Bar dataKey="orders" fill="#6366F1" name="Orders" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="customers" fill="#10B981" name="New Customers" radius={[4, 4, 0, 0]} />
                       <Line type="monotone" dataKey="profit" stroke="#F59E0B" strokeWidth={3} name="Profit (K)" />
@@ -941,7 +938,6 @@ export default function RetailerDashboardDemo() {
                           backdropFilter: "blur(10px)",
                         }}
                       />
-                      <Legend />
                       <Area
                         type="monotone"
                         dataKey="profit"
