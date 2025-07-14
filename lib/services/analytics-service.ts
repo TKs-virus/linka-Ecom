@@ -23,7 +23,9 @@ export interface ProductAnalytics {
 export class AnalyticsService {
   // Record business analytics
   async recordBusinessAnalytics(data: AnalyticsData): Promise<void> {
-    await executeQuery('analytics', `
+    await executeQuery(
+      "analytics",
+      `
       INSERT INTO business_analytics (
         business_id, metric_date, total_revenue, total_orders,
         new_customers, page_views, unique_visitors
@@ -36,15 +38,17 @@ export class AnalyticsService {
         page_views = business_analytics.page_views + EXCLUDED.page_views,
         unique_visitors = business_analytics.unique_visitors + EXCLUDED.unique_visitors,
         updated_at = NOW()
-    `, [
-      data.businessId,
-      data.date,
-      data.revenue || 0,
-      data.orders || 0,
-      data.customers || 0,
-      data.pageViews || 0,
-      data.pageViews || 0 // Using pageViews as unique visitors for simplicity
-    ])
+    `,
+      [
+        data.businessId,
+        data.date,
+        data.revenue || 0,
+        data.orders || 0,
+        data.customers || 0,
+        data.pageViews || 0,
+        data.pageViews || 0, // Using pageViews as unique visitors for simplicity
+      ],
+    )
   }
 
   // Record analytics event
@@ -54,19 +58,25 @@ export class AnalyticsService {
     eventName: string,
     eventData: any,
     userId?: string,
-    sessionId?: string
+    sessionId?: string,
   ): Promise<void> {
-    await executeQuery('analytics', `
+    await executeQuery(
+      "analytics",
+      `
       INSERT INTO analytics_events (
         business_id, event_type, event_name, event_data,
         user_id, session_id, timestamp
       ) VALUES ($1, $2, $3, $4, $5, $6, NOW())
-    `, [businessId, eventType, eventName, JSON.stringify(eventData), userId, sessionId])
+    `,
+      [businessId, eventType, eventName, JSON.stringify(eventData), userId, sessionId],
+    )
   }
 
   // Get business analytics summary
   async getBusinessAnalytics(businessId: string, days = 30): Promise<any[]> {
-    return executeQuery('analytics', `
+    return executeQuery(
+      "analytics",
+      `
       SELECT 
         metric_date,
         total_revenue,
@@ -81,12 +91,14 @@ export class AnalyticsService {
       WHERE business_id = $1 
         AND metric_date >= CURRENT_DATE - INTERVAL '${days} days'
       ORDER BY metric_date DESC
-    `, [businessId])
+    `,
+      [businessId],
+    )
   }
 
   // Get product performance analytics
   async getProductAnalytics(businessId: string, productId?: string, days = 30): Promise<any[]> {
-    const query = productId 
+    const query = productId
       ? `SELECT * FROM product_analytics 
          WHERE business_id = $1 AND product_id = $2 
            AND metric_date >= CURRENT_DATE - INTERVAL '${days} days'
@@ -97,7 +109,7 @@ export class AnalyticsService {
          ORDER BY metric_date DESC, revenue DESC`
 
     const params = productId ? [businessId, productId] : [businessId]
-    return executeQuery('analytics', query, params)
+    return executeQuery("analytics", query, params)
   }
 
   // Get customer behavior analytics
@@ -122,4 +134,6 @@ export class AnalyticsService {
          ORDER BY total_spent DESC`
 
     const params = customerId ? [businessId, customerId] : [businessId]
-    return executeQuery
+    return executeQuery("analytics", query, params)
+  }
+}
