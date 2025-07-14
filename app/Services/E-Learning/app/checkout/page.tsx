@@ -338,26 +338,26 @@ export default function CheckoutPage() {
                     {items.map((item) => (
                       <div key={item.id} className="flex justify-between text-sm">
                         <span className="truncate pr-2">{item.title}</span>
-                        <span className="font-medium">ZMW{item.price}</span>
+                        <span className="font-medium">${item.price}</span>
                       </div>
                     ))}
                   </div>
                   <div className="border-t pt-4">
                     <div className="flex justify-between">
                       <span>Subtotal:</span>
-                      <span>ZMW{totalPrice.toFixed(2)}</span>
+                      <span>${totalPrice.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Tax:</span>
-                      <span>ZMW0.00</span>
+                      <span>$0.00</span>
                     </div>
                     <div className="flex justify-between text-lg font-bold mt-2">
                       <span>Total:</span>
-                      <span>ZMW{totalPrice.toFixed(2)}</span>
+                      <span>${totalPrice.toFixed(2)}</span>
                     </div>
                   </div>
                   <Button onClick={handlePayment} className="w-full" size="lg" disabled={isProcessing}>
-                    {isProcessing ? "Processing..." : `Pay ZMW${totalPrice.toFixed(2)}`}
+                    {isProcessing ? "Processing..." : `Pay $${totalPrice.toFixed(2)}`}
                   </Button>
                   <Button variant="outline" asChild className="w-full bg-transparent">
                     <a href="/cart">

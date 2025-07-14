@@ -1,113 +1,21 @@
-version: '3.8'
-
 services:
-  # Development Main Platform
-  main-platform:
+  # Development environment with hot reload
+  dev-platform:
     build:
       context: .
       dockerfile: Dockerfile
+      target: dev
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-      - PORT=3000
+      - NEXT_TELEMETRY_DISABLED=1
     volumes:
       - .:/app
       - /app/node_modules
       - /app/.next
-    command: ["pnpm", "dev"]
-    restart: unless-stopped
-
-  # Development Services
-  ecommerce-dev:
-    build:
-      context: ./Services/E-com
-      dockerfile: ../../Dockerfile
-    ports:
-      - "3001:3000"
-    environment:
-      - NODE_ENV=development
-      - PORT=3000
-    volumes:
-      - ./Services/E-com:/app
-      - /app/node_modules
-    command: ["pnpm", "dev"]
-    restart: unless-stopped
-
-  elearning-dev:
-    build:
-      context: ./Services/E-Learning
-      dockerfile: ../../Dockerfile
-    ports:
-      - "3002:3000"
-    environment:
-      - NODE_ENV=development
-      - PORT=3000
-    volumes:
-      - ./Services/E-Learning:/app
-      - /app/node_modules
-    command: ["pnpm", "dev"]
-    restart: unless-stopped
-
-  fooddelivery-dev:
-    build:
-      context: ./Services/Food-Delivery
-      dockerfile: ../../Dockerfile
-    ports:
-      - "3003:3000"
-    environment:
-      - NODE_ENV=development
-      - PORT=3000
-    volumes:
-      - ./Services/Food-Delivery:/app
-      - /app/node_modules
-    command: ["pnpm", "dev"]
-    restart: unless-stopped
-
-  healthcare-dev:
-    build:
-      context: ./Services/Healthcare
-      dockerfile: ../../Dockerfile
-    ports:
-      - "3004:3000"
-    environment:
-      - NODE_ENV=development
-      - PORT=3000
-    volumes:
-      - ./Services/Healthcare:/app
-      - /app/node_modules
-    command: ["pnpm", "dev"]
-    restart: unless-stopped
-
-  travel-dev:
-    build:
-      context: ./Services/Travel_&_Tourism
-      dockerfile: ../../Dockerfile
-    ports:
-      - "3005:3000"
-    environment:
-      - NODE_ENV=development
-      - PORT=3000
-    volumes:
-      - ./Services/Travel_&_Tourism:/app
-      - /app/node_modules
-    command: ["pnpm", "dev"]
-    restart: unless-stopped
-
-  wholesale-dev:
-    build:
-      context: ./Services/Wholesale
-      dockerfile: ../../Dockerfile
-    ports:
-      - "3006:3000"
-    environment:
-      - NODE_ENV=development
-      - PORT=3000
-    volumes:
-      - ./Services/Wholesale:/app
-      - /app/node_modules
-    command: ["pnpm", "dev"]
-    restart: unless-stopped
+    networks:
+      - dev-network
 
   # Development database
   dev-postgres:
@@ -122,7 +30,7 @@ services:
       - dev-postgres-data:/var/lib/postgresql/data
       - ./scripts:/docker-entrypoint-initdb.d
     networks:
-      - default
+      - dev-network
 
   # Development Redis
   dev-redis:
@@ -130,7 +38,7 @@ services:
     ports:
       - "6379:6379"
     networks:
-      - default
+      - dev-network
 
   # Development monitoring
   dev-prometheus:
@@ -140,10 +48,10 @@ services:
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
-      - default
+      - dev-network
 
 networks:
-  default:
+  dev-network:
     driver: bridge
 
 volumes:

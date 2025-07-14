@@ -12,6 +12,8 @@ export interface Database {
           phone: string | null
           role: "CUSTOMER" | "RETAILER" | "DELIVERY"
           avatar_url: string | null
+          email_verified: boolean
+          verification_token: string | null
           created_at: string
           updated_at: string
         }
@@ -23,6 +25,8 @@ export interface Database {
           phone?: string | null
           role?: "CUSTOMER" | "RETAILER" | "DELIVERY"
           avatar_url?: string | null
+          email_verified?: boolean
+          verification_token?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -34,6 +38,8 @@ export interface Database {
           phone?: string | null
           role?: "CUSTOMER" | "RETAILER" | "DELIVERY"
           avatar_url?: string | null
+          email_verified?: boolean
+          verification_token?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -47,8 +53,12 @@ export interface Database {
           business_address: string | null
           business_phone: string | null
           business_email: string | null
+          company_name: string | null
+          industry_type: string | null
+          store_location: string | null
           logo_url: string | null
           is_verified: boolean
+          inventory_file_url: string | null
           created_at: string
           updated_at: string
         }
@@ -60,8 +70,12 @@ export interface Database {
           business_address?: string | null
           business_phone?: string | null
           business_email?: string | null
+          company_name?: string | null
+          industry_type?: string | null
+          store_location?: string | null
           logo_url?: string | null
           is_verified?: boolean
+          inventory_file_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -73,8 +87,12 @@ export interface Database {
           business_address?: string | null
           business_phone?: string | null
           business_email?: string | null
+          company_name?: string | null
+          industry_type?: string | null
+          store_location?: string | null
           logo_url?: string | null
           is_verified?: boolean
+          inventory_file_url?: string | null
           created_at?: string
           updated_at?: string
         }
