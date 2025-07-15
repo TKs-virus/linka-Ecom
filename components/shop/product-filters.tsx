@@ -1,187 +1,224 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
-import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { X } from "lucide-react"
-import { useState } from "react"
+import { Separator } from "@/components/ui/separator"
+import { X, Filter } from "lucide-react"
+import { getCategories } from "@/app/actions/product-actions"
 
-const categories = [
-  { id: "electronics", name: "Electronics", count: 45 },
-  { id: "fashion", name: "Fashion", count: 32 },
-  { id: "food", name: "Food & Beverage", count: 28 },
-  { id: "home", name: "Home & Garden", count: 19 },
-  { id: "books", name: "Books", count: 15 },
-  { id: "sports", name: "Sports & Outdoors", count: 12 },
-]
+interface ProductFiltersProps {
+  onFiltersChange: (filters: {
+    category?: string
+    minPrice?: number
+    maxPrice?: number
+    featured?: boolean
+  }) => void
+  currentFilters: {
+    category?: string
+    minPrice?: number
+    maxPrice?: number
+    featured?: boolean
+  }
+}
 
-const retailers = [
-  { id: "tech-store", name: "Tech Electronics", count: 23 },
-  { id: "fashion-forward", name: "Fashion Forward", count: 18 },
-  { id: "local-roastery", name: "Local Coffee Roastery", count: 12 },
-  { id: "artisan-leather", name: "Artisan Leather Co.", count: 8 },
-  { id: "downtown-bakery", name: "Downtown Bakery", count: 6 },
-]
+export function ProductFilters({ onFiltersChange, currentFilters }: ProductFiltersProps) {
+  const [categories, setCategories] = useState<string[]>([])
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000])
+  const [selectedCategory, setSelectedCategory] = useState<string>(currentFilters.category || "all")
+  const [featuredOnly, setFeaturedOnly] = useState<boolean>(currentFilters.featured || false)
 
-export function ProductFilters() {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedRetailers, setSelectedRetailers] = useState<string[]>([])
-  const [priceRange, setPriceRange] = useState([0, 500])
-  const [showOnSale, setShowOnSale] = useState(false)
-  const [showInStock, setShowInStock] = useState(true)
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const result = await getCategories()
+        if (result.success) {
+          setCategories(result.data)
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error)
+      }
+    }
 
-  const toggleCategory = (categoryId: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
-    )
+    fetchCategories()
+  }, [])
+
+  useEffect(() => {
+    if (currentFilters.minPrice !== undefined || currentFilters.maxPrice !== undefined) {
+      setPriceRange([currentFilters.minPrice || 0, currentFilters.maxPrice || 1000])
+    }
+  }, [currentFilters.minPrice, currentFilters.maxPrice])
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category)
+    onFiltersChange({
+      ...currentFilters,
+      category: category === "all" ? undefined : category,
+    })
   }
 
-  const toggleRetailer = (retailerId: string) => {
-    setSelectedRetailers((prev) =>
-      prev.includes(retailerId) ? prev.filter((id) => id !== retailerId) : [...prev, retailerId],
-    )
+  const handlePriceChange = (value: [number, number]) => {
+    setPriceRange(value)
+    onFiltersChange({
+      ...currentFilters,
+      minPrice: value[0],
+      maxPrice: value[1],
+    })
   }
 
-  const clearAllFilters = () => {
-    setSelectedCategories([])
-    setSelectedRetailers([])
-    setPriceRange([0, 500])
-    setShowOnSale(false)
-    setShowInStock(true)
+  const handleFeaturedChange = (checked: boolean) => {
+    setFeaturedOnly(checked)
+    onFiltersChange({
+      ...currentFilters,
+      featured: checked || undefined,
+    })
   }
 
-  const activeFiltersCount =
-    selectedCategories.length + selectedRetailers.length + (showOnSale ? 1 : 0) + (!showInStock ? 1 : 0)
+  const clearFilters = () => {
+    setSelectedCategory("all")
+    setPriceRange([0, 1000])
+    setFeaturedOnly(false)
+    onFiltersChange({})
+  }
+
+  const hasActiveFilters = selectedCategory !== "all" || priceRange[0] > 0 || priceRange[1] < 1000 || featuredOnly
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Filters</h2>
-        {activeFiltersCount > 0 && (
-          <Button variant="ghost" size="sm" onClick={clearAllFilters}>
-            Clear All ({activeFiltersCount})
-          </Button>
-        )}
-      </div>
+    <Card className="sticky top-4">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg font-semibold flex items-center space-x-2">
+            <Filter className="w-5 h-5" />
+            <span>Filters</span>
+          </CardTitle>
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-slate-600 hover:text-slate-900">
+              <X className="w-4 h-4 mr-1" />
+              Clear
+            </Button>
+          )}
+        </div>
+      </CardHeader>
 
-      {/* Active Filters */}
-      {activeFiltersCount > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium">Active Filters</h3>
-          <div className="flex flex-wrap gap-2">
-            {selectedCategories.map((categoryId) => {
-              const category = categories.find((c) => c.id === categoryId)
-              return (
-                <Badge key={categoryId} variant="secondary" className="flex items-center gap-1">
-                  {category?.name}
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => toggleCategory(categoryId)} />
-                </Badge>
-              )
-            })}
-            {selectedRetailers.map((retailerId) => {
-              const retailer = retailers.find((r) => r.id === retailerId)
-              return (
-                <Badge key={retailerId} variant="secondary" className="flex items-center gap-1">
-                  {retailer?.name}
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => toggleRetailer(retailerId)} />
-                </Badge>
-              )
-            })}
-            {showOnSale && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                On Sale
-                <X className="h-3 w-3 cursor-pointer" onClick={() => setShowOnSale(false)} />
-              </Badge>
-            )}
+      <CardContent className="space-y-6">
+        {/* Categories */}
+        <div className="space-y-3">
+          <Label className="text-sm font-semibold text-slate-900">Category</Label>
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="category-all"
+                checked={selectedCategory === "all"}
+                onCheckedChange={() => handleCategoryChange("all")}
+              />
+              <Label htmlFor="category-all" className="text-sm font-medium cursor-pointer">
+                All Categories
+              </Label>
+            </div>
+            {categories.map((category) => (
+              <div key={category} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`category-${category}`}
+                  checked={selectedCategory === category}
+                  onCheckedChange={() => handleCategoryChange(category)}
+                />
+                <Label htmlFor={`category-${category}`} className="text-sm font-medium cursor-pointer">
+                  {category}
+                </Label>
+              </div>
+            ))}
           </div>
         </div>
-      )}
 
-      {/* Price Range */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Price Range</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Slider value={priceRange} onValueChange={setPriceRange} max={500} step={10} className="w-full" />
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>${priceRange[0]}</span>
-            <span>${priceRange[1]}</span>
+        <Separator />
+
+        {/* Price Range */}
+        <div className="space-y-4">
+          <Label className="text-sm font-semibold text-slate-900">Price Range</Label>
+          <div className="px-2">
+            <Slider
+              value={priceRange}
+              onValueChange={handlePriceChange}
+              max={1000}
+              min={0}
+              step={10}
+              className="w-full"
+            />
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex items-center justify-between text-sm text-slate-600">
+            <span>K{priceRange[0]}</span>
+            <span>K{priceRange[1]}</span>
+          </div>
+        </div>
 
-      {/* Categories */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Categories</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {categories.map((category) => (
-            <div key={category.id} className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id={category.id}
-                  checked={selectedCategories.includes(category.id)}
-                  onCheckedChange={() => toggleCategory(category.id)}
-                />
-                <Label htmlFor={category.id} className="text-sm font-normal">
-                  {category.name}
-                </Label>
-              </div>
-              <span className="text-xs text-muted-foreground">({category.count})</span>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+        <Separator />
 
-      {/* Retailers */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Retailers</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {retailers.map((retailer) => (
-            <div key={retailer.id} className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id={retailer.id}
-                  checked={selectedRetailers.includes(retailer.id)}
-                  onCheckedChange={() => toggleRetailer(retailer.id)}
-                />
-                <Label htmlFor={retailer.id} className="text-sm font-normal">
-                  {retailer.name}
-                </Label>
-              </div>
-              <span className="text-xs text-muted-foreground">({retailer.count})</span>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      {/* Additional Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Additional Filters</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
+        {/* Featured Products */}
+        <div className="space-y-3">
+          <Label className="text-sm font-semibold text-slate-900">Special</Label>
           <div className="flex items-center space-x-2">
-            <Checkbox id="on-sale" checked={showOnSale} onCheckedChange={setShowOnSale} />
-            <Label htmlFor="on-sale" className="text-sm font-normal">
-              On Sale
+            <Checkbox id="featured-only" checked={featuredOnly} onCheckedChange={handleFeaturedChange} />
+            <Label htmlFor="featured-only" className="text-sm font-medium cursor-pointer">
+              Featured Products Only
             </Label>
           </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox id="in-stock" checked={showInStock} onCheckedChange={setShowInStock} />
-            <Label htmlFor="in-stock" className="text-sm font-normal">
-              In Stock Only
-            </Label>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+
+        {/* Active Filters */}
+        {hasActiveFilters && (
+          <>
+            <Separator />
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold text-slate-900">Active Filters</Label>
+              <div className="flex flex-wrap gap-2">
+                {selectedCategory !== "all" && (
+                  <Badge variant="secondary" className="text-xs">
+                    {selectedCategory}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 ml-1 hover:bg-transparent"
+                      onClick={() => handleCategoryChange("all")}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </Badge>
+                )}
+                {(priceRange[0] > 0 || priceRange[1] < 1000) && (
+                  <Badge variant="secondary" className="text-xs">
+                    K{priceRange[0]} - K{priceRange[1]}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 ml-1 hover:bg-transparent"
+                      onClick={() => handlePriceChange([0, 1000])}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </Badge>
+                )}
+                {featuredOnly && (
+                  <Badge variant="secondary" className="text-xs">
+                    Featured
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 ml-1 hover:bg-transparent"
+                      onClick={() => handleFeaturedChange(false)}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   )
 }

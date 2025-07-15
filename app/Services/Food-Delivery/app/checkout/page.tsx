@@ -322,7 +322,7 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="font-medium">ZMW{(item.price * item.quantity).toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
@@ -344,7 +344,7 @@ export default function CheckoutPage() {
                   {appliedCoupon && (
                     <div className="flex justify-between text-sm text-green-600">
                       <span>Coupon ({appliedCoupon.code})</span>
-                      <span>-${discount.toFixed(2)}</span>
+                      <span>-ZMW{discount.toFixed(2)}</span>
                     </div>
                   )}
                 </div>
@@ -355,26 +355,26 @@ export default function CheckoutPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>ZMW{subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Delivery Fee</span>
-                    <span>${deliveryFee.toFixed(2)}</span>
+                    <span>ZMW{deliveryFee.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Tax</span>
-                    <span>${tax.toFixed(2)}</span>
+                    <span>ZMW{tax.toFixed(2)}</span>
                   </div>
                   {discount > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span>Discount</span>
-                      <span>-${discount.toFixed(2)}</span>
+                      <span>-ZMW{discount.toFixed(2)}</span>
                     </div>
                   )}
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>ZMW{total.toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -384,7 +384,7 @@ export default function CheckoutPage() {
                   onClick={handlePlaceOrder}
                   disabled={isProcessing}
                 >
-                  {isProcessing ? "Processing..." : `Place Order - $${total.toFixed(2)}`}
+                  {isProcessing ? "Processing..." : `Place Order - ZMW${total.toFixed(2)}`}
                 </Button>
 
                 <div className="flex space-x-2">

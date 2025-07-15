@@ -1,65 +1,46 @@
-FROM node:20-alpine AS base
-
-# Install pnpm globally
-RUN npm install -g pnpm
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Configure pnpm with official registry and SSL settings
+# Install pnpm globally
+RUN npm install -g pnpm
+
+# Configure pnpm for reliability
 RUN pnpm config set registry https://registry.npmjs.org/ && \
     pnpm config set network-timeout 300000 && \
-    pnpm config set fetch-retries 5 && \
-    pnpm config set fetch-retry-factor 2 && \
-    pnpm config set fetch-retry-mintimeout 10000 && \
-    pnpm config set fetch-retry-maxtimeout 60000 && \
-    pnpm config set strict-ssl false
+    pnpm config set fetch-retries 3
 
-# Dependencies stage
-FROM base AS deps
+# Copy package files
 COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile --network-timeout=300000
 
-# Development stage
-FROM base AS dev
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --network-timeout=300000
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
 COPY . .
-EXPOSE 3000
-CMD ["pnpm", "dev"]
-
-# Builder stage
-FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-# Set environment variables
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
 
 # Build the application
 RUN pnpm build
 
-# Production stage
-FROM node:20-alpine AS runner
-WORKDIR /app
+# Set environment variables
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
+# Change ownership of the app directory
+RUN chown -R nextjs:nodejs /app
 
-# Copy built application
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
+# Switch to non-root user
 USER nextjs
 
+# Expose port
 EXPOSE 3000
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
-
-CMD ["node", "server.js"]
+# Start the application
+CMD ["pnpm", "start"]
