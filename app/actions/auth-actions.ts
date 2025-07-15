@@ -15,11 +15,16 @@ export type AuthState = {
 }
 
 export async function loginUser(prevState: AuthState | undefined, formData: FormData): Promise<AuthState> {
+  console.log("=== Login User Action Called ===")
+
   const email = formData.get("email") as string
   const password = formData.get("password") as string
 
+  console.log("Login attempt for email:", email)
+
   // Validation
   if (!email || typeof email !== "string") {
+    console.log("Invalid email provided")
     return {
       success: false,
       message: "Invalid email.",
@@ -28,6 +33,7 @@ export async function loginUser(prevState: AuthState | undefined, formData: Form
   }
 
   if (!password || typeof password !== "string") {
+    console.log("Invalid password provided")
     return {
       success: false,
       message: "Invalid password.",
@@ -38,6 +44,7 @@ export async function loginUser(prevState: AuthState | undefined, formData: Form
   // Email format validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(email)) {
+    console.log("Invalid email format:", email)
     return {
       success: false,
       message: "Invalid email format.",
@@ -46,24 +53,56 @@ export async function loginUser(prevState: AuthState | undefined, formData: Form
   }
 
   try {
+    console.log("Creating Supabase client...")
     const supabase = createServerClient()
 
+    // Test connection first
+    console.log("Testing database connection...")
+    const { data: testData, error: testError } = await supabase.from("users").select("count").limit(1)
+
+    if (testError) {
+      console.error("Database connection test failed:", testError)
+      return {
+        success: false,
+        message: "Database connection failed.",
+        error: { field: "general", message: "Unable to connect to database. Please try again later." },
+      }
+    }
+
+    console.log("Database connection test successful")
+
     // Sign in with Supabase Auth
+    console.log("Attempting authentication...")
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
     if (authError) {
-      console.error("Auth error:", authError)
+      console.error("Auth error:", {
+        message: authError.message,
+        status: authError.status,
+        name: authError.name,
+      })
+
+      // Handle specific auth errors
+      if (authError.message.includes("Invalid login credentials")) {
+        return {
+          success: false,
+          message: "Invalid credentials.",
+          error: { field: "general", message: "Incorrect email or password." },
+        }
+      }
+
       return {
         success: false,
-        message: "Invalid credentials.",
-        error: { field: "general", message: "Incorrect email or password." },
+        message: "Authentication failed.",
+        error: { field: "general", message: authError.message },
       }
     }
 
     if (!authData.user) {
+      console.error("No user data returned from auth")
       return {
         success: false,
         message: "Authentication failed.",
@@ -71,41 +110,80 @@ export async function loginUser(prevState: AuthState | undefined, formData: Form
       }
     }
 
+    console.log("Authentication successful for user:", authData.user.id)
+
     // Get user profile from our users table
-    const { data: userData, error: userError } = await supabase
+    console.log("Fetching user profile...")
+    let userData // Changed from const to let
+    const { data: fetchedUserData, error: userError } = await supabase
       .from("users")
       .select("*")
       .eq("id", authData.user.id)
       .single()
 
-    if (userError || !userData) {
+    if (userError) {
       console.error("User profile error:", userError)
-      return {
-        success: false,
-        message: "User profile not found.",
-        error: { field: "general", message: "User profile not found." },
+
+      // If user doesn't exist in our users table, create it
+      if (userError.code === "PGRST116") {
+        console.log("User profile not found, creating...")
+        const { data: newUserData, error: createError } = await supabase
+          .from("users")
+          .insert({
+            id: authData.user.id,
+            email: authData.user.email!,
+            first_name: authData.user.user_metadata?.first_name || "User",
+            last_name: authData.user.user_metadata?.last_name || "",
+            role: "CUSTOMER",
+          })
+          .select()
+          .single()
+
+        if (createError) {
+          console.error("Failed to create user profile:", createError)
+          return {
+            success: false,
+            message: "Failed to create user profile.",
+            error: { field: "general", message: "Failed to create user profile." },
+          }
+        }
+
+        userData = newUserData
+      } else {
+        return {
+          success: false,
+          message: "User profile not found.",
+          error: { field: "general", message: "User profile not found." },
+        }
       }
     }
 
+    if (!userData) {
+      userData = fetchedUserData // Assign fetchedUserData to userData
+    }
+
+    console.log("User profile retrieved:", { id: userData.id, role: userData.role })
+
     // Set session cookie
     const cookieStore = cookies()
-    cookieStore.set(
-      "session",
-      JSON.stringify({
-        userId: userData.id,
-        role: userData.role,
-        email: userData.email,
-      }),
-      {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24 * 7, // 1 week
-        path: "/",
-      },
-    )
+    const sessionData = {
+      userId: userData.id,
+      role: userData.role,
+      email: userData.email,
+    }
+
+    console.log("Setting session cookie...")
+    cookieStore.set("session", JSON.stringify(sessionData), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      path: "/",
+      sameSite: "lax",
+    })
 
     // Determine redirect path based on role
     const redirectTo = userData.role === "RETAILER" ? "/dashboard" : "/shop"
+    console.log("Login successful, redirecting to:", redirectTo)
 
     return {
       success: true,
@@ -117,12 +195,17 @@ export async function loginUser(prevState: AuthState | undefined, formData: Form
     return {
       success: false,
       message: "An unexpected error occurred.",
-      error: { field: "general", message: "Please try again later." },
+      error: {
+        field: "general",
+        message: error instanceof Error ? error.message : "Please try again later.",
+      },
     }
   }
 }
 
 export async function signUpUser(prevState: AuthState | undefined, formData: FormData): Promise<AuthState> {
+  console.log("=== Sign Up User Action Called ===")
+
   const email = formData.get("email") as string
   const password = formData.get("password") as string
   const confirmPassword = formData.get("confirmPassword") as string
@@ -131,6 +214,8 @@ export async function signUpUser(prevState: AuthState | undefined, formData: For
   const phone = formData.get("phone") as string
   const userType = formData.get("userType") as string
   const terms = formData.get("terms") as string
+
+  console.log("Signup attempt for email:", email, "userType:", userType)
 
   // Validation
   if (!firstName || typeof firstName !== "string" || firstName.trim().length < 2) {
@@ -200,12 +285,28 @@ export async function signUpUser(prevState: AuthState | undefined, formData: For
   }
 
   try {
+    console.log("Creating Supabase client for signup...")
     const supabase = createServerClient()
 
+    // Test connection first
+    console.log("Testing database connection...")
+    const { error: testError } = await supabase.from("users").select("count").limit(1)
+
+    if (testError) {
+      console.error("Database connection test failed:", testError)
+      return {
+        success: false,
+        message: "Database connection failed.",
+        error: { field: "general", message: "Unable to connect to database. Please try again later." },
+      }
+    }
+
     // Check if user already exists
+    console.log("Checking if user exists...")
     const { data: existingUser } = await supabase.from("users").select("email").eq("email", email).single()
 
     if (existingUser) {
+      console.log("User already exists:", email)
       return {
         success: false,
         message: "An account with this email already exists.",
@@ -214,6 +315,7 @@ export async function signUpUser(prevState: AuthState | undefined, formData: For
     }
 
     // Sign up with Supabase Auth
+    console.log("Creating auth user...")
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -237,6 +339,7 @@ export async function signUpUser(prevState: AuthState | undefined, formData: For
     }
 
     if (!authData.user) {
+      console.error("No user data returned from signup")
       return {
         success: false,
         message: "Sign up failed.",
@@ -244,7 +347,10 @@ export async function signUpUser(prevState: AuthState | undefined, formData: For
       }
     }
 
+    console.log("Auth user created:", authData.user.id)
+
     // Create user profile in our users table
+    console.log("Creating user profile...")
     const { error: profileError } = await supabase.from("users").insert({
       id: authData.user.id,
       email,
@@ -263,8 +369,11 @@ export async function signUpUser(prevState: AuthState | undefined, formData: For
       }
     }
 
+    console.log("User profile created successfully")
+
     // If user is a retailer, create retailer profile
     if (userType.toUpperCase() === "RETAILER") {
+      console.log("Creating retailer profile...")
       const { error: retailerError } = await supabase.from("retailers").insert({
         user_id: authData.user.id,
         business_name: `${firstName} ${lastName}'s Store`,
@@ -273,6 +382,9 @@ export async function signUpUser(prevState: AuthState | undefined, formData: For
 
       if (retailerError) {
         console.error("Failed to create retailer profile:", retailerError)
+        // Don't fail the signup for this, just log it
+      } else {
+        console.log("Retailer profile created successfully")
       }
     }
 
@@ -285,19 +397,24 @@ export async function signUpUser(prevState: AuthState | undefined, formData: For
     return {
       success: false,
       message: "An unexpected error occurred.",
-      error: { field: "general", message: "Please try again later." },
+      error: {
+        field: "general",
+        message: error instanceof Error ? error.message : "Please try again later.",
+      },
     }
   }
 }
 
 export async function logoutUser() {
   try {
+    console.log("Logging out user...")
     const supabase = createServerClient()
     await supabase.auth.signOut()
 
     const cookieStore = cookies()
     cookieStore.delete("session")
 
+    console.log("Logout successful")
     redirect("/login")
   } catch (error) {
     console.error("Logout error:", error)
@@ -315,6 +432,7 @@ export async function getCurrentUser() {
     } = await supabase.auth.getUser()
 
     if (error || !user) {
+      console.log("No current user found")
       return null
     }
 

@@ -1,81 +1,53 @@
 import { NextResponse } from "next/server"
-import { createServerClient } from "@/lib/supabase/server"
+import { testDatabaseConnection, testAuth } from "@/lib/supabase/client"
+import { testServerConnection } from "@/lib/supabase/server"
 
 export async function GET() {
   try {
-    const supabase = createServerClient()
+    console.log("=== Debug API Route Called ===")
 
-    // Test various database operations
-    const tests = {
-      users: null as any,
-      products: null as any,
-      orders: null as any,
-      retailers: null as any,
+    // Check environment variables
+    const envCheck = {
+      NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+      NODE_ENV: process.env.NODE_ENV,
     }
 
-    // Test users table
-    try {
-      const { data: users, error: usersError } = await supabase.from("users").select("id, email, role").limit(5)
+    console.log("Environment variables check:", envCheck)
 
-      tests.users = usersError ? { error: usersError.message } : { count: users?.length || 0 }
-    } catch (err) {
-      tests.users = { error: err instanceof Error ? err.message : "Unknown error" }
-    }
+    // Test client-side connection
+    const clientTest = await testDatabaseConnection()
+    console.log("Client test result:", clientTest)
 
-    // Test products table
-    try {
-      const { data: products, error: productsError } = await supabase
-        .from("products")
-        .select("id, name, price")
-        .limit(5)
+    // Test server-side connection
+    const serverTest = await testServerConnection()
+    console.log("Server test result:", serverTest)
 
-      tests.products = productsError ? { error: productsError.message } : { count: products?.length || 0 }
-    } catch (err) {
-      tests.products = { error: err instanceof Error ? err.message : "Unknown error" }
-    }
+    // Test auth
+    const authTest = await testAuth()
+    console.log("Auth test result:", authTest)
 
-    // Test orders table
-    try {
-      const { data: orders, error: ordersError } = await supabase
-        .from("orders")
-        .select("id, status, total_amount")
-        .limit(5)
-
-      tests.orders = ordersError ? { error: ordersError.message } : { count: orders?.length || 0 }
-    } catch (err) {
-      tests.orders = { error: err instanceof Error ? err.message : "Unknown error" }
-    }
-
-    // Test retailers table
-    try {
-      const { data: retailers, error: retailersError } = await supabase
-        .from("retailers")
-        .select("id, business_name")
-        .limit(5)
-
-      tests.retailers = retailersError ? { error: retailersError.message } : { count: retailers?.length || 0 }
-    } catch (err) {
-      tests.retailers = { error: err instanceof Error ? err.message : "Unknown error" }
-    }
-
-    return NextResponse.json({
-      status: "debug",
-      environment: {
-        NODE_ENV: process.env.NODE_ENV,
-        SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? "Set" : "Missing",
-        SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Set" : "Missing",
-        SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? "Set" : "Missing",
-      },
-      database_tests: tests,
+    const debugInfo = {
       timestamp: new Date().toISOString(),
-    })
+      environment: envCheck,
+      tests: {
+        client: clientTest,
+        server: serverTest,
+        auth: authTest,
+      },
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      anonKeyPrefix: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20) + "...",
+    }
+
+    return NextResponse.json(debugInfo)
   } catch (error) {
+    console.error("Debug API error:", error)
     return NextResponse.json(
       {
-        status: "error",
-        message: "Debug check failed",
-        error: error instanceof Error ? error.message : "Unknown error",
-        timestamp: new Date().toISOString(),
+        error: "Debug API failed",
+        message: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 },
     )
