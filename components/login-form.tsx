@@ -1,5 +1,5 @@
 "use client"
-import { useActionState, useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,7 @@ import { loginUser, type AuthState } from "@/app/actions/auth-actions"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertTriangle, Play, BarChart3 } from "lucide-react"
 import Link from "next/link"
+import { useActionState } from "@/hooks/use-action-state"
 
 const initialState: AuthState = {
   message: "",
