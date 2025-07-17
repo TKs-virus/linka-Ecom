@@ -1,27 +1,32 @@
 "use client"
 
-import { startTransition, useState, useTransition } from "react"
+import { useCallback, useRef, useState, useTransition } from "react"
 
-/**
- * Tiny poly-fill for React 19’s `useActionState`.
- *   - `action` must be an async function that returns the new state.
- *   - Returned tuple:  [state, boundAction, isPending]
- */
-export function useActionState<State>(
-  action: (prevState: State | undefined, formData: FormData) => Promise<State>,
-  initialState: State,
-): [State, (formData: FormData) => void, boolean] {
-  const [state, setState] = useState<State>(initialState)
-  const [isPending, start] = useTransition()
+type ActionState<T> = T | null
+type ActionFunction<T> = (prevState: T | null, formData: FormData) => Promise<T>
 
-  async function boundAction(formData: FormData) {
-    // keep UI responsive with a transition
-    start(async () => {
-      const newState = await action(state, formData)
-      // `startTransition` so React 18 doesn’t block input
-      startTransition(() => setState(newState))
-    })
-  }
+export function useActionState<T>(
+  action: ActionFunction<T>,
+  initialState: T | null = null,
+): [ActionState<T>, (formData: FormData) => void, boolean] {
+  const [state, setState] = useState<ActionState<T>>(initialState)
+  const [isPending, startTransition] = useTransition()
+  const actionRef = useRef(action)
+  actionRef.current = action
 
-  return [state, boundAction, isPending]
+  const dispatch = useCallback(
+    (formData: FormData) => {
+      startTransition(async () => {
+        try {
+          const result = await actionRef.current(state, formData)
+          setState(result)
+        } catch (error) {
+          console.error("Action failed:", error)
+        }
+      })
+    },
+    [state],
+  )
+
+  return [state, dispatch, isPending]
 }
