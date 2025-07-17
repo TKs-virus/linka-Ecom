@@ -444,3 +444,10 @@ export async function getCurrentUser() {
     return null
   }
 }
+
+// -----------------------------------------------------------------------------
+// Aliases required by components that import `loginAction` and `signupAction`.
+// They simply point to the already-implemented server actions.
+// -----------------------------------------------------------------------------
+export const loginAction = loginUser
+export const signupAction = signUpUser
