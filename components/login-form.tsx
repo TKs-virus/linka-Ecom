@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { loginUser, type AuthState } from "@/app/actions/auth-actions"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertTriangle, Loader2, Eye, EyeOff } from "lucide-react"
-import { useActionState } from "react"
+import { useActionState } from "@/hooks/use-action-state"
 
 const initialState: AuthState = {
   message: "",

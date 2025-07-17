@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { signUpUser, type AuthState } from "@/app/actions/auth-actions"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Eye, EyeOff, Loader2, CheckCircle, AlertTriangle } from "lucide-react"
-import { useActionState } from "react"
+import { useActionState } from "@/hooks/use-action-state"
 
 const initialState: AuthState = {
   message: "",
