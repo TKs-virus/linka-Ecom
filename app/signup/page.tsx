@@ -25,11 +25,12 @@ export default function SignupPage() {
           </CardContent>
         </Card>
 
-        <div className="text-center text-sm">
-          <span className="text-muted-foreground">Already have an account? </span>
-          <Button variant="link" className="p-0 h-auto" asChild>
-            <Link href="/login">Sign in</Link>
-          </Button>
+        <div className="text-center text-sm space-y-2">
+          <div>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/">← Back to Home</Link>
+            </Button>
+          </div>
         </div>
       </div>
     </div>

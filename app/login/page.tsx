@@ -27,12 +27,6 @@ export default function LoginPage() {
 
         <div className="text-center text-sm space-y-2">
           <div>
-            <span className="text-muted-foreground">Don't have an account? </span>
-            <Button variant="link" className="p-0 h-auto" asChild>
-              <Link href="/signup">Sign up</Link>
-            </Button>
-          </div>
-          <div>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/">← Back to Home</Link>
             </Button>

@@ -28,12 +28,10 @@ export const createServerClient = () => {
     cookies: {
       get(name: string) {
         const cookie = cookieStore.get(name)
-        console.log(`Getting cookie ${name}:`, cookie?.value ? "present" : "missing")
         return cookie?.value
       },
       set(name: string, value: string, options: any) {
         try {
-          console.log(`Setting cookie ${name}`)
           cookieStore.set({ name, value, ...options })
         } catch (error) {
           console.error("Error setting cookie:", error)
@@ -41,7 +39,6 @@ export const createServerClient = () => {
       },
       remove(name: string, options: any) {
         try {
-          console.log(`Removing cookie ${name}`)
           cookieStore.set({ name, value: "", ...options })
         } catch (error) {
           console.error("Error removing cookie:", error)
@@ -52,6 +49,7 @@ export const createServerClient = () => {
       persistSession: false,
       autoRefreshToken: false,
       detectSessionInUrl: false,
+      flowType: "pkce",
     },
     global: {
       headers: {
@@ -77,6 +75,7 @@ export const createServiceClient = () => {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
+      flowType: "pkce",
     },
     global: {
       headers: {

@@ -3,14 +3,19 @@
 import { createServerClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
+import { revalidatePath } from "next/cache"
 
 export type AuthState = {
   message: string
   success: boolean
   redirectTo?: string
-  error?: {
-    field?: "email" | "password" | "firstName" | "lastName" | "userType" | "confirmPassword" | "general"
-    message: string
+  error?: string
+  fieldErrors?: {
+    email?: string
+    password?: string
+    firstName?: string
+    lastName?: string
+    confirmPassword?: string
   }
 }
 
@@ -24,145 +29,125 @@ export async function loginUser(prevState: AuthState | undefined, formData: Form
 
   // Validation
   if (!email || typeof email !== "string") {
-    console.log("Invalid email provided")
     return {
       success: false,
-      message: "Invalid email.",
-      error: { field: "email", message: "Email is required." },
+      message: "Email is required.",
+      fieldErrors: { email: "Email is required." },
     }
   }
 
   if (!password || typeof password !== "string") {
-    console.log("Invalid password provided")
     return {
       success: false,
-      message: "Invalid password.",
-      error: { field: "password", message: "Password is required." },
+      message: "Password is required.",
+      fieldErrors: { password: "Password is required." },
     }
   }
 
   // Email format validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(email)) {
-    console.log("Invalid email format:", email)
     return {
       success: false,
-      message: "Invalid email format.",
-      error: { field: "email", message: "Please enter a valid email address." },
+      message: "Please enter a valid email address.",
+      fieldErrors: { email: "Please enter a valid email address." },
     }
   }
 
   try {
-    console.log("Creating Supabase client...")
     const supabase = createServerClient()
 
-    // Test connection first
-    console.log("Testing database connection...")
-    const { data: testData, error: testError } = await supabase.from("users").select("count").limit(1)
-
-    if (testError) {
-      console.error("Database connection test failed:", testError)
-      return {
-        success: false,
-        message: "Database connection failed.",
-        error: { field: "general", message: "Unable to connect to database. Please try again later." },
-      }
-    }
-
-    console.log("Database connection test successful")
-
     // Sign in with Supabase Auth
-    console.log("Attempting authentication...")
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
     if (authError) {
-      console.error("Auth error:", {
-        message: authError.message,
-        status: authError.status,
-        name: authError.name,
-      })
+      console.error("Auth error:", authError)
 
       // Handle specific auth errors
       if (authError.message.includes("Invalid login credentials")) {
         return {
           success: false,
-          message: "Invalid credentials.",
-          error: { field: "general", message: "Incorrect email or password." },
+          message: "Invalid email or password.",
+          error: "Invalid email or password.",
+        }
+      }
+
+      if (authError.message.includes("Email not confirmed")) {
+        return {
+          success: false,
+          message: "Please check your email and click the confirmation link before signing in.",
+          error: "Please check your email and click the confirmation link before signing in.",
         }
       }
 
       return {
         success: false,
-        message: "Authentication failed.",
-        error: { field: "general", message: authError.message },
+        message: authError.message,
+        error: authError.message,
       }
     }
 
     if (!authData.user) {
-      console.error("No user data returned from auth")
       return {
         success: false,
-        message: "Authentication failed.",
-        error: { field: "general", message: "Unable to authenticate user." },
+        message: "Authentication failed. Please try again.",
+        error: "Authentication failed. Please try again.",
       }
     }
 
     console.log("Authentication successful for user:", authData.user.id)
 
-    // Get user profile from our users table
-    console.log("Fetching user profile...")
-    let userData // Changed from const to let
-    const { data: fetchedUserData, error: userError } = await supabase
+    // Get or create user profile
+    let userData
+    const { data: existingUser, error: userError } = await supabase
       .from("users")
       .select("*")
       .eq("id", authData.user.id)
       .single()
 
-    if (userError) {
-      console.error("User profile error:", userError)
+    if (userError && userError.code === "PGRST116") {
+      // User doesn't exist in our users table, create it
+      const { data: newUser, error: createError } = await supabase
+        .from("users")
+        .insert({
+          id: authData.user.id,
+          email: authData.user.email!,
+          first_name:
+            authData.user.user_metadata?.first_name || authData.user.user_metadata?.full_name?.split(" ")[0] || "User",
+          last_name:
+            authData.user.user_metadata?.last_name ||
+            authData.user.user_metadata?.full_name?.split(" ").slice(1).join(" ") ||
+            "",
+          role: "CUSTOMER",
+          avatar_url: authData.user.user_metadata?.avatar_url || null,
+          provider: authData.user.app_metadata?.provider || "email",
+        })
+        .select()
+        .single()
 
-      // If user doesn't exist in our users table, create it
-      if (userError.code === "PGRST116") {
-        console.log("User profile not found, creating...")
-        const { data: newUserData, error: createError } = await supabase
-          .from("users")
-          .insert({
-            id: authData.user.id,
-            email: authData.user.email!,
-            first_name: authData.user.user_metadata?.first_name || "User",
-            last_name: authData.user.user_metadata?.last_name || "",
-            role: "CUSTOMER",
-          })
-          .select()
-          .single()
-
-        if (createError) {
-          console.error("Failed to create user profile:", createError)
-          return {
-            success: false,
-            message: "Failed to create user profile.",
-            error: { field: "general", message: "Failed to create user profile." },
-          }
-        }
-
-        userData = newUserData
-      } else {
+      if (createError) {
+        console.error("Failed to create user profile:", createError)
         return {
           success: false,
-          message: "User profile not found.",
-          error: { field: "general", message: "User profile not found." },
+          message: "Failed to create user profile.",
+          error: "Failed to create user profile.",
         }
       }
-    }
 
-    if (!userData) {
-      userData = fetchedUserData // Assign fetchedUserData to userData
+      userData = newUser
+    } else if (userError) {
+      console.error("User profile error:", userError)
+      return {
+        success: false,
+        message: "Failed to retrieve user profile.",
+        error: "Failed to retrieve user profile.",
+      }
+    } else {
+      userData = existingUser
     }
-
-    console.log("User profile retrieved:", { id: userData.id, role: userData.role })
 
     // Set session cookie
     const cookieStore = cookies()
@@ -170,9 +155,10 @@ export async function loginUser(prevState: AuthState | undefined, formData: Form
       userId: userData.id,
       role: userData.role,
       email: userData.email,
+      firstName: userData.first_name,
+      lastName: userData.last_name,
     }
 
-    console.log("Setting session cookie...")
     cookieStore.set("session", JSON.stringify(sessionData), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -183,22 +169,15 @@ export async function loginUser(prevState: AuthState | undefined, formData: Form
 
     // Determine redirect path based on role
     const redirectTo = userData.role === "RETAILER" ? "/dashboard" : "/shop"
-    console.log("Login successful, redirecting to:", redirectTo)
 
-    return {
-      success: true,
-      message: "Login successful!",
-      redirectTo,
-    }
+    revalidatePath("/")
+    redirect(redirectTo)
   } catch (error) {
     console.error("Login error:", error)
     return {
       success: false,
-      message: "An unexpected error occurred.",
-      error: {
-        field: "general",
-        message: error instanceof Error ? error.message : "Please try again later.",
-      },
+      message: "An unexpected error occurred. Please try again.",
+      error: "An unexpected error occurred. Please try again.",
     }
   }
 }
@@ -211,111 +190,58 @@ export async function signUpUser(prevState: AuthState | undefined, formData: For
   const confirmPassword = formData.get("confirmPassword") as string
   const firstName = formData.get("firstName") as string
   const lastName = formData.get("lastName") as string
-  const phone = formData.get("phone") as string
-  const userType = formData.get("userType") as string
-  const terms = formData.get("terms") as string
-
-  console.log("Signup attempt for email:", email, "userType:", userType)
 
   // Validation
+  const fieldErrors: AuthState["fieldErrors"] = {}
+
   if (!firstName || typeof firstName !== "string" || firstName.trim().length < 2) {
-    return {
-      success: false,
-      message: "First name is required and must be at least 2 characters.",
-      error: { field: "firstName", message: "First name must be at least 2 characters." },
-    }
+    fieldErrors.firstName = "First name must be at least 2 characters."
   }
 
   if (!lastName || typeof lastName !== "string" || lastName.trim().length < 2) {
-    return {
-      success: false,
-      message: "Last name is required and must be at least 2 characters.",
-      error: { field: "lastName", message: "Last name must be at least 2 characters." },
-    }
+    fieldErrors.lastName = "Last name must be at least 2 characters."
   }
 
   if (!email || typeof email !== "string") {
-    return {
-      success: false,
-      message: "Email is required.",
-      error: { field: "email", message: "Email is required." },
-    }
-  }
-
-  // Email format validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email)) {
-    return {
-      success: false,
-      message: "Invalid email format.",
-      error: { field: "email", message: "Please enter a valid email address." },
+    fieldErrors.email = "Email is required."
+  } else {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      fieldErrors.email = "Please enter a valid email address."
     }
   }
 
   if (!password || typeof password !== "string" || password.length < 8) {
-    return {
-      success: false,
-      message: "Password must be at least 8 characters long.",
-      error: { field: "password", message: "Password must be at least 8 characters long." },
-    }
+    fieldErrors.password = "Password must be at least 8 characters long."
   }
 
   if (password !== confirmPassword) {
-    return {
-      success: false,
-      message: "Passwords do not match.",
-      error: { field: "confirmPassword", message: "Passwords do not match." },
-    }
+    fieldErrors.confirmPassword = "Passwords do not match."
   }
 
-  if (!userType || !["customer", "retailer", "delivery"].includes(userType)) {
+  if (Object.keys(fieldErrors).length > 0) {
     return {
       success: false,
-      message: "Please select a valid user type.",
-      error: { field: "userType", message: "Please select a user type." },
-    }
-  }
-
-  if (!terms) {
-    return {
-      success: false,
-      message: "You must agree to the terms and conditions.",
-      error: { field: "general", message: "You must agree to the terms and conditions." },
+      message: "Please fix the errors below.",
+      fieldErrors,
     }
   }
 
   try {
-    console.log("Creating Supabase client for signup...")
     const supabase = createServerClient()
 
-    // Test connection first
-    console.log("Testing database connection...")
-    const { error: testError } = await supabase.from("users").select("count").limit(1)
-
-    if (testError) {
-      console.error("Database connection test failed:", testError)
-      return {
-        success: false,
-        message: "Database connection failed.",
-        error: { field: "general", message: "Unable to connect to database. Please try again later." },
-      }
-    }
-
     // Check if user already exists
-    console.log("Checking if user exists...")
     const { data: existingUser } = await supabase.from("users").select("email").eq("email", email).single()
 
     if (existingUser) {
-      console.log("User already exists:", email)
       return {
         success: false,
         message: "An account with this email already exists.",
-        error: { field: "email", message: "An account with this email already exists." },
+        fieldErrors: { email: "An account with this email already exists." },
       }
     }
 
     // Sign up with Supabase Auth
-    console.log("Creating auth user...")
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -323,41 +249,45 @@ export async function signUpUser(prevState: AuthState | undefined, formData: For
         data: {
           first_name: firstName,
           last_name: lastName,
-          phone: phone || null,
-          role: userType.toUpperCase(),
+          full_name: `${firstName} ${lastName}`,
         },
       },
     })
 
     if (authError) {
       console.error("Auth signup error:", authError)
+
+      if (authError.message.includes("User already registered")) {
+        return {
+          success: false,
+          message: "An account with this email already exists.",
+          fieldErrors: { email: "An account with this email already exists." },
+        }
+      }
+
       return {
         success: false,
-        message: "Sign up failed.",
-        error: { field: "general", message: authError.message },
+        message: authError.message,
+        error: authError.message,
       }
     }
 
     if (!authData.user) {
-      console.error("No user data returned from signup")
       return {
         success: false,
-        message: "Sign up failed.",
-        error: { field: "general", message: "Unable to create user account." },
+        message: "Failed to create account. Please try again.",
+        error: "Failed to create account. Please try again.",
       }
     }
 
-    console.log("Auth user created:", authData.user.id)
-
     // Create user profile in our users table
-    console.log("Creating user profile...")
     const { error: profileError } = await supabase.from("users").insert({
       id: authData.user.id,
       email,
       first_name: firstName,
       last_name: lastName,
-      phone: phone || null,
-      role: userType.toUpperCase() as "CUSTOMER" | "RETAILER" | "DELIVERY",
+      role: "CUSTOMER",
+      provider: "email",
     })
 
     if (profileError) {
@@ -365,60 +295,77 @@ export async function signUpUser(prevState: AuthState | undefined, formData: For
       return {
         success: false,
         message: "Failed to create user profile.",
-        error: { field: "general", message: "Failed to create user profile." },
-      }
-    }
-
-    console.log("User profile created successfully")
-
-    // If user is a retailer, create retailer profile
-    if (userType.toUpperCase() === "RETAILER") {
-      console.log("Creating retailer profile...")
-      const { error: retailerError } = await supabase.from("retailers").insert({
-        user_id: authData.user.id,
-        business_name: `${firstName} ${lastName}'s Store`,
-        business_email: email,
-      })
-
-      if (retailerError) {
-        console.error("Failed to create retailer profile:", retailerError)
-        // Don't fail the signup for this, just log it
-      } else {
-        console.log("Retailer profile created successfully")
+        error: "Failed to create user profile.",
       }
     }
 
     return {
       success: true,
-      message: "Account created successfully! Please check your email to verify your account.",
+      message: "Account created successfully! Please check your email to verify your account before signing in.",
     }
   } catch (error) {
     console.error("Signup error:", error)
     return {
       success: false,
-      message: "An unexpected error occurred.",
-      error: {
-        field: "general",
-        message: error instanceof Error ? error.message : "Please try again later.",
+      message: "An unexpected error occurred. Please try again.",
+      error: "An unexpected error occurred. Please try again.",
+    }
+  }
+}
+
+export async function signInWithGoogle() {
+  try {
+    const supabase = createServerClient()
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
       },
+    })
+
+    if (error) {
+      console.error("Google OAuth error:", error)
+      return {
+        success: false,
+        error: error.message,
+      }
+    }
+
+    if (data.url) {
+      redirect(data.url)
+    }
+
+    return {
+      success: true,
+      message: "Redirecting to Google...",
+    }
+  } catch (error) {
+    console.error("Google sign-in error:", error)
+    return {
+      success: false,
+      error: "Failed to initiate Google sign-in. Please try again.",
     }
   }
 }
 
 export async function logoutUser() {
   try {
-    console.log("Logging out user...")
     const supabase = createServerClient()
     await supabase.auth.signOut()
 
     const cookieStore = cookies()
     cookieStore.delete("session")
 
-    console.log("Logout successful")
-    redirect("/login")
+    revalidatePath("/")
+    redirect("/")
   } catch (error) {
     console.error("Logout error:", error)
-    redirect("/login")
+    redirect("/")
   }
 }
 
@@ -432,7 +379,6 @@ export async function getCurrentUser() {
     } = await supabase.auth.getUser()
 
     if (error || !user) {
-      console.log("No current user found")
       return null
     }
 
@@ -445,9 +391,6 @@ export async function getCurrentUser() {
   }
 }
 
-// -----------------------------------------------------------------------------
-// Aliases required by components that import `loginAction` and `signupAction`.
-// They simply point to the already-implemented server actions.
-// -----------------------------------------------------------------------------
+// Aliases for backward compatibility
 export const loginAction = loginUser
 export const signupAction = signUpUser
