@@ -75,7 +75,6 @@
     "react-hook-form": "latest",
     "react-resizable-panels": "latest",
     "recharts": "latest",
-    "shadcn": "latest",
     "sharp": "^0.33.2",
     "sonner": "latest",
     "tailwind-merge": "^2.5.5",
