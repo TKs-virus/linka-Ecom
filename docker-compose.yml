@@ -13,14 +13,10 @@ networks:
     driver: bridge
   services-network:
     driver: bridge
-  linka-network:
-    driver: bridge
 
 volumes:
   redis-data:
   postgres-data:
-  node_modules:
-  next_cache:
 
 services:
   # Load Balancer
@@ -48,26 +44,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
     environment:
-      - NODE_ENV=production
       - PORT=3000
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
     networks:
       - linka-main
       - services-network
     depends_on:
       - redis
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     deploy:
       replicas: 2
 
@@ -223,96 +209,186 @@ services:
   # ===== INDUSTRY/SERVICE CLUSTERS =====
 
   # E-commerce Industry Cluster
-  ecommerce-service:
+  ecommerce-service-1:
     build:
       context: ./Services/E-com
       dockerfile: ../../Dockerfile
-    ports:
-      - "3001:3000"
     environment:
+      - PORT=4001
       - NODE_ENV=production
-      - PORT=3000
       - SERVICE_TYPE=ecommerce
+      - CLUSTER_ID=ecom-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  ecommerce-service-2:
+    build:
+      context: ./Services/E-com
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4001
+      - NODE_ENV=production
+      - SERVICE_TYPE=ecommerce
+      - CLUSTER_ID=ecom-2
+      - REDIS_URL=redis://redis:6379
     networks:
       - services-network
       - linka-main
     restart: unless-stopped
 
   # E-learning Industry Cluster
-  elearning-service:
+  elearning-service-1:
     build:
       context: ./Services/E-Learning
       dockerfile: ../../Dockerfile
-    ports:
-      - "3002:3000"
     environment:
+      - PORT=4002
       - NODE_ENV=production
-      - PORT=3000
       - SERVICE_TYPE=elearning
+      - CLUSTER_ID=elearn-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  elearning-service-2:
+    build:
+      context: ./Services/E-Learning
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4002
+      - NODE_ENV=production
+      - SERVICE_TYPE=elearning
+      - CLUSTER_ID=elearn-2
+      - REDIS_URL=redis://redis:6379
     networks:
       - services-network
       - linka-main
     restart: unless-stopped
 
   # Food Delivery Industry Cluster
-  fooddelivery-service:
+  fooddelivery-service-1:
     build:
       context: ./Services/Food-Delivery
       dockerfile: ../../Dockerfile
-    ports:
-      - "3003:3000"
     environment:
+      - PORT=4003
       - NODE_ENV=production
-      - PORT=3000
       - SERVICE_TYPE=fooddelivery
+      - CLUSTER_ID=food-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  fooddelivery-service-2:
+    build:
+      context: ./Services/Food-Delivery
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4003
+      - NODE_ENV=production
+      - SERVICE_TYPE=fooddelivery
+      - CLUSTER_ID=food-2
+      - REDIS_URL=redis://redis:6379
     networks:
       - services-network
       - linka-main
     restart: unless-stopped
 
   # Healthcare Industry Cluster
-  healthcare-service:
+  healthcare-service-1:
     build:
       context: ./Services/Healthcare
       dockerfile: ../../Dockerfile
-    ports:
-      - "3004:3000"
     environment:
+      - PORT=4004
       - NODE_ENV=production
-      - PORT=3000
       - SERVICE_TYPE=healthcare
+      - CLUSTER_ID=health-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  healthcare-service-2:
+    build:
+      context: ./Services/Healthcare
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4004
+      - NODE_ENV=production
+      - SERVICE_TYPE=healthcare
+      - CLUSTER_ID=health-2
+      - REDIS_URL=redis://redis:6379
     networks:
       - services-network
       - linka-main
     restart: unless-stopped
 
   # Travel & Tourism Industry Cluster
-  travel-service:
+  travel-service-1:
     build:
       context: ./Services/Travel_&_Tourism
       dockerfile: ../../Dockerfile
-    ports:
-      - "3005:3000"
     environment:
+      - PORT=4005
       - NODE_ENV=production
-      - PORT=3000
       - SERVICE_TYPE=travel
+      - CLUSTER_ID=travel-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  travel-service-2:
+    build:
+      context: ./Services/Travel_&_Tourism
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4005
+      - NODE_ENV=production
+      - SERVICE_TYPE=travel
+      - CLUSTER_ID=travel-2
+      - REDIS_URL=redis://redis:6379
     networks:
       - services-network
       - linka-main
     restart: unless-stopped
 
   # Wholesale Industry Cluster
-  wholesale-service:
+  wholesale-service-1:
     build:
       context: ./Services/Wholesale
       dockerfile: ../../Dockerfile
-    ports:
-      - "3006:3000"
     environment:
+      - PORT=4006
       - NODE_ENV=production
-      - PORT=3000
       - SERVICE_TYPE=wholesale
+      - CLUSTER_ID=wholesale-1
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - services-network
+      - linka-main
+    restart: unless-stopped
+
+  wholesale-service-2:
+    build:
+      context: ./Services/Wholesale
+      dockerfile: ../../Dockerfile
+    environment:
+      - PORT=4006
+      - NODE_ENV=production
+      - SERVICE_TYPE=wholesale
+      - CLUSTER_ID=wholesale-2
+      - REDIS_URL=redis://redis:6379
     networks:
       - services-network
       - linka-main
@@ -442,3 +518,11 @@ services:
     networks:
       - linka-network
     restart: unless-stopped
+
+networks:
+  linka-network:
+    driver: bridge
+
+volumes:
+  node_modules:
+  next_cache:

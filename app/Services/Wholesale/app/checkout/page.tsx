@@ -269,7 +269,7 @@ export default function CheckoutPage() {
                     <Alert>
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
-                        Payment amount: <strong>ZMW{orderTotal.toFixed(2)} USD</strong>
+                        Payment amount: <strong>${orderTotal.toFixed(2)} USD</strong>
                       </AlertDescription>
                     </Alert>
 
@@ -297,7 +297,7 @@ export default function CheckoutPage() {
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className="font-medium">ZMW{crypto.usdValue.toFixed(2)}</p>
+                              <p className="font-medium">${crypto.usdValue.toFixed(2)}</p>
                               {crypto.usdValue >= orderTotal ? (
                                 <Badge variant="secondary" className="text-green-600">
                                   <Check className="h-3 w-3 mr-1" />
@@ -319,7 +319,7 @@ export default function CheckoutPage() {
                               </div>
                               <div className="flex justify-between text-sm text-muted-foreground">
                                 <span>USD equivalent:</span>
-                                <span>ZMW{orderTotal.toFixed(2)}</span>
+                                <span>${orderTotal.toFixed(2)}</span>
                               </div>
                               <div className="flex justify-between text-sm text-muted-foreground">
                                 <span>Remaining balance:</span>
@@ -361,7 +361,7 @@ export default function CheckoutPage() {
                         <p className="font-medium">{item.name}</p>
                         <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                       </div>
-                      <p className="font-medium">ZMW{(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
                     </div>
                   ))}
 
@@ -369,24 +369,24 @@ export default function CheckoutPage() {
 
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>ZMW{(orderTotal - 384.0 - 25.0).toFixed(2)}</span>
+                    <span>${(orderTotal - 384.0 - 25.0).toFixed(2)}</span>
                   </div>
 
                   <div className="flex justify-between">
                     <span>Shipping</span>
-                    <span>ZMW25.00</span>
+                    <span>$25.00</span>
                   </div>
 
                   <div className="flex justify-between">
                     <span>Tax</span>
-                    <span>ZMW384.00</span>
+                    <span>$384.00</span>
                   </div>
 
                   <Separator />
 
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
-                    <span>ZMW{orderTotal.toFixed(2)}</span>
+                    <span>${orderTotal.toFixed(2)}</span>
                   </div>
 
                   <Button
@@ -395,7 +395,7 @@ export default function CheckoutPage() {
                     onClick={handlePayment}
                     disabled={!paymentMethod || isProcessing || (paymentMethod === "crypto" && !selectedCrypto)}
                   >
-                    {isProcessing ? "Processing Payment..." : `Pay ZMW${orderTotal.toFixed(2)}`}
+                    {isProcessing ? "Processing Payment..." : `Pay $${orderTotal.toFixed(2)}`}
                   </Button>
 
                   <p className="text-xs text-center text-muted-foreground">

@@ -18,19 +18,24 @@ export default function LoginPage() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle>Welcome Back</CardTitle>
-            <CardDescription>Sign in to your account to continue</CardDescription>
+            <CardDescription>Sign in to your Linka account</CardDescription>
           </CardHeader>
           <CardContent>
             <LoginForm />
           </CardContent>
         </Card>
 
-        <div className="text-center text-sm space-y-2">
-          <div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/">← Back to Home</Link>
-            </Button>
-          </div>
+        <div className="text-center text-sm">
+          <span className="text-muted-foreground">Don't have an account? </span>
+          <Button variant="link" className="p-0 h-auto" asChild>
+            <Link href="/signup">Sign up</Link>
+          </Button>
+        </div>
+
+        <div className="text-center">
+          <Button variant="outline" asChild className="w-full bg-transparent">
+            <Link href="/dashboard">Continue as Guest (Demo)</Link>
+          </Button>
         </div>
       </div>
     </div>

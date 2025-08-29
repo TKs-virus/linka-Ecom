@@ -1,51 +1,45 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       users: {
         Row: {
           id: string
           email: string
-          first_name: string
-          last_name: string
+          first_name: string | null
+          last_name: string | null
           phone: string | null
           role: "CUSTOMER" | "RETAILER" | "DELIVERY"
           avatar_url: string | null
-          provider: string
-          provider_id: string | null
           email_verified: boolean
-          last_sign_in_at: string | null
+          verification_token: string | null
           created_at: string
           updated_at: string
         }
         Insert: {
-          id: string
+          id?: string
           email: string
-          first_name: string
-          last_name: string
+          first_name?: string | null
+          last_name?: string | null
           phone?: string | null
           role?: "CUSTOMER" | "RETAILER" | "DELIVERY"
           avatar_url?: string | null
-          provider?: string
-          provider_id?: string | null
           email_verified?: boolean
-          last_sign_in_at?: string | null
+          verification_token?: string | null
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
           email?: string
-          first_name?: string
-          last_name?: string
+          first_name?: string | null
+          last_name?: string | null
           phone?: string | null
           role?: "CUSTOMER" | "RETAILER" | "DELIVERY"
           avatar_url?: string | null
-          provider?: string
-          provider_id?: string | null
           email_verified?: boolean
-          last_sign_in_at?: string | null
+          verification_token?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -55,12 +49,16 @@ export type Database = {
           id: string
           user_id: string
           business_name: string
-          business_email: string
-          business_phone: string | null
-          business_address: string | null
           business_description: string | null
-          business_logo_url: string | null
+          business_address: string | null
+          business_phone: string | null
+          business_email: string | null
+          company_name: string | null
+          industry_type: string | null
+          store_location: string | null
+          logo_url: string | null
           is_verified: boolean
+          inventory_file_url: string | null
           created_at: string
           updated_at: string
         }
@@ -68,12 +66,16 @@ export type Database = {
           id?: string
           user_id: string
           business_name: string
-          business_email: string
-          business_phone?: string | null
-          business_address?: string | null
           business_description?: string | null
-          business_logo_url?: string | null
+          business_address?: string | null
+          business_phone?: string | null
+          business_email?: string | null
+          company_name?: string | null
+          industry_type?: string | null
+          store_location?: string | null
+          logo_url?: string | null
           is_verified?: boolean
+          inventory_file_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -81,12 +83,16 @@ export type Database = {
           id?: string
           user_id?: string
           business_name?: string
-          business_email?: string
-          business_phone?: string | null
-          business_address?: string | null
           business_description?: string | null
-          business_logo_url?: string | null
+          business_address?: string | null
+          business_phone?: string | null
+          business_email?: string | null
+          company_name?: string | null
+          industry_type?: string | null
+          store_location?: string | null
+          logo_url?: string | null
           is_verified?: boolean
+          inventory_file_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -98,9 +104,11 @@ export type Database = {
           name: string
           description: string | null
           price: number
+          compare_at_price: number | null
           category: string
-          image_url: string | null
-          stock_quantity: number
+          subcategory: string | null
+          images: string[]
+          inventory_count: number
           is_active: boolean
           created_at: string
           updated_at: string
@@ -111,9 +119,11 @@ export type Database = {
           name: string
           description?: string | null
           price: number
+          compare_at_price?: number | null
           category: string
-          image_url?: string | null
-          stock_quantity?: number
+          subcategory?: string | null
+          images?: string[]
+          inventory_count?: number
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -124,10 +134,71 @@ export type Database = {
           name?: string
           description?: string | null
           price?: number
+          compare_at_price?: number | null
           category?: string
-          image_url?: string | null
-          stock_quantity?: number
+          subcategory?: string | null
+          images?: string[]
+          inventory_count?: number
           is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      promotions: {
+        Row: {
+          id: string
+          retailer_id: string
+          name: string
+          description: string | null
+          type: "percentage" | "fixed_amount" | "free_shipping"
+          value: number
+          coupon_code: string | null
+          start_date: string
+          end_date: string
+          status: "active" | "scheduled" | "expired" | "draft"
+          applicable_to: "all_products" | "specific_products" | "specific_categories"
+          product_ids: string[] | null
+          category_ids: string[] | null
+          usage_limit: number | null
+          times_used: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          retailer_id: string
+          name: string
+          description?: string | null
+          type: "percentage" | "fixed_amount" | "free_shipping"
+          value: number
+          coupon_code?: string | null
+          start_date: string
+          end_date: string
+          status?: "active" | "scheduled" | "expired" | "draft"
+          applicable_to: "all_products" | "specific_products" | "specific_categories"
+          product_ids?: string[] | null
+          category_ids?: string[] | null
+          usage_limit?: number | null
+          times_used?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          retailer_id?: string
+          name?: string
+          description?: string | null
+          type?: "percentage" | "fixed_amount" | "free_shipping"
+          value?: number
+          coupon_code?: string | null
+          start_date?: string
+          end_date?: string
+          status?: "active" | "scheduled" | "expired" | "draft"
+          applicable_to?: "all_products" | "specific_products" | "specific_categories"
+          product_ids?: string[] | null
+          category_ids?: string[] | null
+          usage_limit?: number | null
+          times_used?: number
           created_at?: string
           updated_at?: string
         }
@@ -137,10 +208,16 @@ export type Database = {
           id: string
           customer_id: string
           retailer_id: string
+          status: "pending" | "confirmed" | "preparing" | "ready" | "delivered" | "cancelled"
           total_amount: number
-          status: "PENDING" | "CONFIRMED" | "PREPARING" | "READY" | "DELIVERED" | "CANCELLED"
-          delivery_address: string
-          delivery_notes: string | null
+          delivery_fee: number
+          tax_amount: number
+          discount_amount: number
+          delivery_address: Json
+          payment_method: string
+          payment_status: "pending" | "paid" | "failed" | "refunded"
+          notes: string | null
+          estimated_delivery: string | null
           created_at: string
           updated_at: string
         }
@@ -148,10 +225,16 @@ export type Database = {
           id?: string
           customer_id: string
           retailer_id: string
+          status?: "pending" | "confirmed" | "preparing" | "ready" | "delivered" | "cancelled"
           total_amount: number
-          status?: "PENDING" | "CONFIRMED" | "PREPARING" | "READY" | "DELIVERED" | "CANCELLED"
-          delivery_address: string
-          delivery_notes?: string | null
+          delivery_fee?: number
+          tax_amount?: number
+          discount_amount?: number
+          delivery_address: Json
+          payment_method: string
+          payment_status?: "pending" | "paid" | "failed" | "refunded"
+          notes?: string | null
+          estimated_delivery?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -159,10 +242,16 @@ export type Database = {
           id?: string
           customer_id?: string
           retailer_id?: string
+          status?: "pending" | "confirmed" | "preparing" | "ready" | "delivered" | "cancelled"
           total_amount?: number
-          status?: "PENDING" | "CONFIRMED" | "PREPARING" | "READY" | "DELIVERED" | "CANCELLED"
-          delivery_address?: string
-          delivery_notes?: string | null
+          delivery_fee?: number
+          tax_amount?: number
+          discount_amount?: number
+          delivery_address?: Json
+          payment_method?: string
+          payment_status?: "pending" | "paid" | "failed" | "refunded"
+          notes?: string | null
+          estimated_delivery?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -206,80 +295,5 @@ export type Database = {
     Enums: {
       [_ in never]: never
     }
-    CompositeTypes: {
-      [_ in never]: never
-    }
   }
 }
-
-export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (Database["public"]["Tables"] & Database["public"]["Views"])
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] & Database["public"]["Views"])
-    ? (Database["public"]["Tables"] & Database["public"]["Views"])[PublicTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  PublicTableNameOrOptions extends keyof Database["public"]["Tables"] | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-    ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  PublicTableNameOrOptions extends keyof Database["public"]["Tables"] | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-    ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  PublicEnumNameOrOptions extends keyof Database["public"]["Enums"] | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
-    ? Database["public"]["Enums"][PublicEnumNameOrOptions]
-    : never

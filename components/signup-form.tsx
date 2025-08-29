@@ -1,211 +1,345 @@
 "use client"
 
+import type React from "react"
 import { useState } from "react"
+import { useActionState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Eye, EyeOff, Loader2 } from "lucide-react"
-import Link from "next/link"
-import { useActionState } from "@/hooks/use-action-state"
-import { signupAction } from "@/app/actions/auth-actions"
-import { signInWithGoogle as clientSignInWithGoogle } from "@/lib/supabase/client"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Eye, EyeOff, Loader2, Upload, X } from "lucide-react"
+import { signUpUser } from "@/app/actions/auth-actions"
+import { useToast } from "@/hooks/use-toast"
+
+const industryTypes = [
+  "Retail & E-commerce",
+  "Food & Beverage",
+  "Fashion & Apparel",
+  "Health & Beauty",
+  "Electronics & Technology",
+  "Home & Garden",
+  "Sports & Recreation",
+  "Books & Media",
+  "Automotive",
+  "Arts & Crafts",
+  "Other",
+]
 
 export function SignupForm() {
-  const [state, formAction, isPending] = useActionState(signupAction, null)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [googleLoading, setGoogleLoading] = useState(false)
+  const [userType, setUserType] = useState("")
+  const [inventoryFile, setInventoryFile] = useState<File | null>(null)
+  const { toast } = useToast()
 
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true)
-    try {
-      const result = await clientSignInWithGoogle()
-      if (!result.success) {
-        console.error("Google sign-in failed:", result.error)
-        // You could show an error message here
+  const [state, formAction, isPending] = useActionState(signUpUser, undefined)
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validate file type
+      const allowedTypes = [
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "text/csv",
+      ]
+
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload an Excel (.xlsx, .xls) or CSV file.",
+          variant: "destructive",
+        })
+        return
       }
-    } catch (error) {
-      console.error("Google sign-in error:", error)
-    } finally {
-      setGoogleLoading(false)
+
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please upload a file smaller than 10MB.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      setInventoryFile(file)
     }
   }
 
+  const removeFile = () => {
+    setInventoryFile(null)
+    // Reset the file input
+    const fileInput = document.getElementById("inventoryFile") as HTMLInputElement
+    if (fileInput) fileInput.value = ""
+  }
+
+  // Show success message if signup was successful
+  if (state?.success) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="text-center">
+          <CardTitle className="text-green-600">Account Created Successfully!</CardTitle>
+          <CardDescription>
+            We've sent a verification email to your address. Please check your email and click the verification link to
+            activate your account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-center">
+          <p className="text-sm text-muted-foreground mb-4">
+            Didn't receive the email? Check your spam folder or contact support.
+          </p>
+          <Button asChild>
+            <a href="/login">Go to Login</a>
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
-    <div className="space-y-6">
+    <form action={formAction} className="space-y-4">
+      {/* Error Message */}
       {state?.error && (
-        <Alert variant="destructive">
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
-      )}
-
-      {state?.success && (
-        <Alert>
-          <AlertDescription>{state.message}</AlertDescription>
-        </Alert>
-      )}
-
-      <form action={formAction} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">First Name</Label>
-            <Input
-              id="firstName"
-              name="firstName"
-              placeholder="John"
-              required
-              disabled={isPending}
-              className={state?.fieldErrors?.firstName ? "border-red-500" : ""}
-            />
-            {state?.fieldErrors?.firstName && <p className="text-sm text-red-500">{state.fieldErrors.firstName}</p>}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name</Label>
-            <Input
-              id="lastName"
-              name="lastName"
-              placeholder="Doe"
-              required
-              disabled={isPending}
-              className={state?.fieldErrors?.lastName ? "border-red-500" : ""}
-            />
-            {state?.fieldErrors?.lastName && <p className="text-sm text-red-500">{state.fieldErrors.lastName}</p>}
-          </div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+          <p className="text-red-800 text-sm">{state.error.message}</p>
         </div>
+      )}
 
+      {/* Basic Information */}
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="firstName">First Name</Label>
           <Input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="john@example.com"
+            id="firstName"
+            name="firstName"
+            type="text"
             required
-            disabled={isPending}
-            className={state?.fieldErrors?.email ? "border-red-500" : ""}
+            placeholder="John"
+            className={state?.error?.field === "firstName" ? "border-red-500" : ""}
           />
-          {state?.fieldErrors?.email && <p className="text-sm text-red-500">{state.fieldErrors.email}</p>}
         </div>
-
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <div className="relative">
-            <Input
-              id="password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="Create a password"
-              required
-              disabled={isPending}
-              className={state?.fieldErrors?.password ? "border-red-500" : ""}
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-              onClick={() => setShowPassword(!showPassword)}
-              disabled={isPending}
-            >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </Button>
-          </div>
-          {state?.fieldErrors?.password && <p className="text-sm text-red-500">{state.fieldErrors.password}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
-          <div className="relative">
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirm your password"
-              required
-              disabled={isPending}
-              className={state?.fieldErrors?.confirmPassword ? "border-red-500" : ""}
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              disabled={isPending}
-            >
-              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </Button>
-          </div>
-          {state?.fieldErrors?.confirmPassword && (
-            <p className="text-sm text-red-500">{state.fieldErrors.confirmPassword}</p>
-          )}
-        </div>
-
-        <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating account...
-            </>
-          ) : (
-            "Create Account"
-          )}
-        </Button>
-      </form>
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+          <Label htmlFor="lastName">Last Name</Label>
+          <Input
+            id="lastName"
+            name="lastName"
+            type="text"
+            required
+            placeholder="Doe"
+            className={state?.error?.field === "lastName" ? "border-red-500" : ""}
+          />
         </div>
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full bg-transparent"
-        onClick={handleGoogleSignIn}
-        disabled={googleLoading || isPending}
-      >
-        {googleLoading ? (
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          required
+          placeholder="john@example.com"
+          className={state?.error?.field === "email" ? "border-red-500" : ""}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="phone">Phone Number</Label>
+        <Input
+          id="phone"
+          name="phone"
+          type="tel"
+          placeholder="+1 (555) 123-4567"
+          className={state?.error?.field === "phone" ? "border-red-500" : ""}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="userType">I am a</Label>
+        <Select name="userType" required onValueChange={setUserType}>
+          <SelectTrigger className={state?.error?.field === "userType" ? "border-red-500" : ""}>
+            <SelectValue placeholder="Select user type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="customer">Customer</SelectItem>
+            <SelectItem value="retailer">Retailer</SelectItem>
+            <SelectItem value="delivery">Delivery Partner</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Retailer-specific fields */}
+      {userType === "retailer" && (
+        <div className="space-y-4 p-4 bg-blue-50 rounded-lg border">
+          <h3 className="font-medium text-blue-900">Business Information</h3>
+
+          <div className="space-y-2">
+            <Label htmlFor="companyName">Company Name</Label>
+            <Input
+              id="companyName"
+              name="companyName"
+              type="text"
+              required
+              placeholder="Your Business Name"
+              className={state?.error?.field === "companyName" ? "border-red-500" : ""}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="industryType">Industry Type</Label>
+            <Select name="industryType" required>
+              <SelectTrigger className={state?.error?.field === "industryType" ? "border-red-500" : ""}>
+                <SelectValue placeholder="Select your industry" />
+              </SelectTrigger>
+              <SelectContent>
+                {industryTypes.map((industry) => (
+                  <SelectItem key={industry} value={industry}>
+                    {industry}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="storeLocation">Store Location</Label>
+            <Textarea
+              id="storeLocation"
+              name="storeLocation"
+              required
+              placeholder="Enter your store address"
+              className={`min-h-[80px] ${state?.error?.field === "storeLocation" ? "border-red-500" : ""}`}
+            />
+          </div>
+
+          {/* Inventory Upload */}
+          <div className="space-y-2">
+            <Label htmlFor="inventoryFile">
+              Inventory Data (Optional)
+              <span className="text-sm text-muted-foreground ml-2">
+                Upload Excel or CSV file with your current inventory
+              </span>
+            </Label>
+
+            {!inventoryFile ? (
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                <div className="text-sm text-gray-600 mb-2">Click to upload or drag and drop</div>
+                <div className="text-xs text-gray-500">Excel (.xlsx, .xls) or CSV files up to 10MB</div>
+                <input
+                  id="inventoryFile"
+                  name="inventoryFile"
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  onChange={handleFileChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <Upload className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-green-800">{inventoryFile.name}</span>
+                  <span className="text-xs text-green-600">({(inventoryFile.size / 1024 / 1024).toFixed(2)} MB)</span>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={removeFile}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Password fields */}
+      <div className="space-y-2">
+        <Label htmlFor="password">Password</Label>
+        <div className="relative">
+          <Input
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            required
+            placeholder="Create a strong password"
+            className={state?.error?.field === "password" ? "border-red-500" : ""}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="confirmPassword">Confirm Password</Label>
+        <div className="relative">
+          <Input
+            id="confirmPassword"
+            name="confirmPassword"
+            type={showConfirmPassword ? "text" : "password"}
+            required
+            placeholder="Confirm your password"
+            className={state?.error?.field === "confirmPassword" ? "border-red-500" : ""}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </Button>
+        </div>
+      </div>
+
+      {/* Terms and conditions */}
+      <div className="flex items-center space-x-2">
+        <Checkbox id="terms" name="terms" required />
+        <Label htmlFor="terms" className="text-sm">
+          I agree to the{" "}
+          <a href="/terms" className="text-primary hover:underline">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a href="/privacy" className="text-primary hover:underline">
+            Privacy Policy
+          </a>
+        </Label>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox id="marketing" name="marketing" />
+        <Label htmlFor="marketing" className="text-sm">
+          I want to receive marketing emails about new products and offers
+        </Label>
+      </div>
+
+      <Button type="submit" className="w-full" disabled={isPending}>
+        {isPending ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Connecting to Google...
+            Creating Account...
           </>
         ) : (
-          <>
-            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="currentColor"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              />
-            </svg>
-            Continue with Google
-          </>
+          "Create Account"
         )}
       </Button>
-
-      <div className="text-center text-sm">
-        <span className="text-muted-foreground">Already have an account? </span>
-        <Link href="/login" className="text-primary hover:underline">
-          Sign in
-        </Link>
-      </div>
-    </div>
+    </form>
   )
 }

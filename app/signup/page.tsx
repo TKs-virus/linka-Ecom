@@ -7,7 +7,7 @@ import { ShoppingBag } from "lucide-react"
 export default function SignupPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
-      <div className="w-full max-w-md space-y-6">
+      <div className="w-full max-w-2xl space-y-6">
         <div className="text-center">
           <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold">
             <ShoppingBag className="h-8 w-8 text-primary" />
@@ -25,12 +25,11 @@ export default function SignupPage() {
           </CardContent>
         </Card>
 
-        <div className="text-center text-sm space-y-2">
-          <div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/">← Back to Home</Link>
-            </Button>
-          </div>
+        <div className="text-center text-sm">
+          <span className="text-muted-foreground">Already have an account? </span>
+          <Button variant="link" className="p-0 h-auto" asChild>
+            <Link href="/login">Sign in</Link>
+          </Button>
         </div>
       </div>
     </div>
