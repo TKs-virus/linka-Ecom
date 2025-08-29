@@ -4,47 +4,6 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChevronLeft, ChevronRight, TrendingUp, Users, DollarSign, Target, Globe, Zap } from "lucide-react"
-import {
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-  Area,
-  AreaChart,
-} from "recharts"
-
-const revenueData = [
-  { name: "Subscriptions", value: 137475, color: "#E67E22" },
-  { name: "Transaction Fees", value: 114915, color: "#2E86AB" },
-  { name: "Commissions", value: 73680, color: "#27AE60" },
-]
-
-const growthData = [
-  { month: "Month 1", revenue: 50000, users: 20 },
-  { month: "Month 3", revenue: 150000, users: 50 },
-  { month: "Month 6", revenue: 326070, users: 100 },
-  { month: "Month 12", revenue: 500000, users: 200 },
-  { month: "Month 18", revenue: 750000, users: 400 },
-  { month: "Month 24", revenue: 1200000, users: 700 },
-]
-
-const marketData = [
-  { year: "2025", zambia: 405, africa: 40490 },
-  { year: "2026", zambia: 437, africa: 43910 },
-  { year: "2027", zambia: 471, africa: 47640 },
-  { year: "2028", zambia: 508, africa: 51700 },
-  { year: "2029", zambia: 548, africa: 56080 },
-  { year: "2030", zambia: 591, africa: 60820 },
-]
-
-const COLORS = ["#E67E22", "#2E86AB", "#27AE60", "#F39C12"]
 
 export default function InvestorPitch() {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -57,10 +16,10 @@ export default function InvestorPitch() {
       content: (
         <div className="text-center space-y-8">
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-brand-orange/20 to-brand-blue/20 rounded-full blur-3xl"></div>
-            <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-brand-orange/20">
-              <Globe className="w-24 h-24 mx-auto mb-6 text-brand-orange" />
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-brand-orange to-brand-blue bg-clip-text text-transparent mb-4">
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-200 to-blue-200 rounded-full blur-3xl opacity-30"></div>
+            <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-orange-200">
+              <Globe className="w-24 h-24 mx-auto mb-6 text-orange-600" />
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent mb-4">
                 Linka
               </h1>
               <p className="text-xl text-gray-600 mb-6">AI-driven E-commerce Platform</p>
@@ -101,33 +60,25 @@ export default function InvestorPitch() {
           </div>
           <div className="flex items-center justify-center">
             <div className="relative w-80 h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: "SMEs with websites", value: 22, color: "#E67E22" },
-                      { name: "SMEs without websites", value: 78, color: "#E5E7EB" },
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={120}
-                    dataKey="value"
-                  >
-                    {[
-                      { name: "SMEs with websites", value: 22, color: "#E67E22" },
-                      { name: "SMEs without websites", value: 78, color: "#E5E7EB" },
-                    ].map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-brand-orange">22%</div>
-                  <div className="text-sm text-gray-600">Have Websites</div>
+              <div className="relative w-64 h-64 mx-auto">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="40" stroke="#E5E7EB" strokeWidth="8" fill="none" />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    stroke="#E67E22"
+                    strokeWidth="8"
+                    fill="none"
+                    strokeDasharray={`${22 * 2.51} ${78 * 2.51}`}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-orange-600">22%</div>
+                    <div className="text-sm text-gray-600">Have Websites</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -142,23 +93,23 @@ export default function InvestorPitch() {
       content: (
         <div className="space-y-8">
           <div className="grid md:grid-cols-3 gap-6">
-            <Card className="border-brand-orange/20 bg-gradient-to-br from-orange-50 to-red-50">
+            <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-red-50">
               <CardContent className="p-6">
-                <Zap className="w-12 h-12 text-brand-orange mb-4" />
+                <Zap className="w-12 h-12 text-orange-600 mb-4" />
                 <h3 className="text-lg font-semibold mb-2">AI-Powered Tools</h3>
                 <p className="text-sm text-gray-600">
                   Dashboard for inventory/sales, customer interface, courier integration
                 </p>
               </CardContent>
             </Card>
-            <Card className="border-brand-blue/20 bg-gradient-to-br from-blue-50 to-indigo-50">
+            <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
               <CardContent className="p-6">
-                <DollarSign className="w-12 h-12 text-brand-blue mb-4" />
+                <DollarSign className="w-12 h-12 text-blue-600 mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Affordable Pricing</h3>
                 <p className="text-sm text-gray-600">Bronze (470 ZMW), Silver (1,175 ZMW), Gold (2,350 ZMW)</p>
               </CardContent>
             </Card>
-            <Card className="border-green-500/20 bg-gradient-to-br from-green-50 to-emerald-50">
+            <Card className="border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
               <CardContent className="p-6">
                 <Users className="w-12 h-12 text-green-600 mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Community Driven</h3>
@@ -166,9 +117,9 @@ export default function InvestorPitch() {
               </CardContent>
             </Card>
           </div>
-          <div className="bg-gradient-to-r from-brand-orange/10 to-brand-blue/10 p-8 rounded-2xl border border-brand-orange/20">
+          <div className="bg-gradient-to-r from-orange-100 to-blue-100 p-8 rounded-2xl border border-orange-200">
             <div className="text-center">
-              <TrendingUp className="w-16 h-16 mx-auto mb-4 text-brand-orange" />
+              <TrendingUp className="w-16 h-16 mx-auto mb-4 text-orange-600" />
               <h3 className="text-2xl font-bold mb-2">Goal: Boost SME Revenue by 25%</h3>
               <p className="text-gray-600">Within the first two years of operation</p>
             </div>
@@ -183,8 +134,8 @@ export default function InvestorPitch() {
       content: (
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-brand-orange/10 to-brand-orange/5 p-6 rounded-xl border border-brand-orange/20">
-              <h3 className="text-xl font-semibold mb-4 text-brand-orange">Zambia Market</h3>
+            <div className="bg-gradient-to-br from-orange-100 to-orange-50 p-6 rounded-xl border border-orange-200">
+              <h3 className="text-xl font-semibold mb-4 text-orange-600">Zambia Market</h3>
               <div className="space-y-2">
                 <p>
                   <span className="font-semibold">$405M</span> market in 2025
@@ -197,8 +148,8 @@ export default function InvestorPitch() {
                 </p>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-brand-blue/10 to-brand-blue/5 p-6 rounded-xl border border-brand-blue/20">
-              <h3 className="text-xl font-semibold mb-4 text-brand-blue">Africa Market</h3>
+            <div className="bg-gradient-to-br from-blue-100 to-blue-50 p-6 rounded-xl border border-blue-200">
+              <h3 className="text-xl font-semibold mb-4 text-blue-600">Africa Market</h3>
               <div className="space-y-2">
                 <p>
                   <span className="font-semibold">$40.49B</span> total market
@@ -222,16 +173,64 @@ export default function InvestorPitch() {
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-4">Market Growth Projection</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={marketData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
-                <YAxis />
-                <Tooltip formatter={(value, name) => [`$${value}M`, name === "zambia" ? "Zambia" : "Africa"]} />
-                <Area type="monotone" dataKey="zambia" stackId="1" stroke="#E67E22" fill="#E67E22" fillOpacity={0.6} />
-                <Area type="monotone" dataKey="africa" stackId="2" stroke="#2E86AB" fill="#2E86AB" fillOpacity={0.3} />
-              </AreaChart>
-            </ResponsiveContainer>
+            <div className="bg-white p-6 rounded-lg border">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">2025</span>
+                  <div className="flex-1 mx-4">
+                    <div className="bg-gray-200 rounded-full h-2">
+                      <div className="bg-orange-500 h-2 rounded-full" style={{ width: "40%" }}></div>
+                    </div>
+                  </div>
+                  <span className="text-sm font-semibold">$405M</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">2026</span>
+                  <div className="flex-1 mx-4">
+                    <div className="bg-gray-200 rounded-full h-2">
+                      <div className="bg-orange-500 h-2 rounded-full" style={{ width: "45%" }}></div>
+                    </div>
+                  </div>
+                  <span className="text-sm font-semibold">$437M</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">2027</span>
+                  <div className="flex-1 mx-4">
+                    <div className="bg-gray-200 rounded-full h-2">
+                      <div className="bg-orange-500 h-2 rounded-full" style={{ width: "50%" }}></div>
+                    </div>
+                  </div>
+                  <span className="text-sm font-semibold">$471M</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">2028</span>
+                  <div className="flex-1 mx-4">
+                    <div className="bg-gray-200 rounded-full h-2">
+                      <div className="bg-orange-500 h-2 rounded-full" style={{ width: "60%" }}></div>
+                    </div>
+                  </div>
+                  <span className="text-sm font-semibold">$508M</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">2029</span>
+                  <div className="flex-1 mx-4">
+                    <div className="bg-gray-200 rounded-full h-2">
+                      <div className="bg-orange-500 h-2 rounded-full" style={{ width: "70%" }}></div>
+                    </div>
+                  </div>
+                  <span className="text-sm font-semibold">$548M</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">2030</span>
+                  <div className="flex-1 mx-4">
+                    <div className="bg-gray-200 rounded-full h-2">
+                      <div className="bg-orange-500 h-2 rounded-full" style={{ width: "80%" }}></div>
+                    </div>
+                  </div>
+                  <span className="text-sm font-semibold">$591M</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       ),
@@ -243,7 +242,7 @@ export default function InvestorPitch() {
       content: (
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-6">
-            <Card className="border-brand-orange/20">
+            <Card className="border-orange-200">
               <CardContent className="p-6">
                 <h3 className="text-xl font-semibold mb-4">Pilot Program</h3>
                 <div className="space-y-3">
@@ -262,7 +261,7 @@ export default function InvestorPitch() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-brand-blue/20">
+            <Card className="border-blue-200">
               <CardContent className="p-6">
                 <h3 className="text-xl font-semibold mb-4">Key Metrics</h3>
                 <div className="space-y-3">
@@ -284,18 +283,46 @@ export default function InvestorPitch() {
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-4">Growth Trajectory</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={growthData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
-                <Tooltip />
-                <Bar yAxisId="left" dataKey="revenue" fill="#E67E22" fillOpacity={0.6} />
-                <Line yAxisId="right" type="monotone" dataKey="users" stroke="#2E86AB" strokeWidth={3} />
-              </LineChart>
-            </ResponsiveContainer>
-            <div className="mt-6 p-4 bg-gradient-to-r from-brand-orange/10 to-brand-blue/10 rounded-lg">
+            <div className="bg-white p-6 rounded-lg border">
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-4 text-sm font-semibold text-gray-600 border-b pb-2">
+                  <span>Period</span>
+                  <span>Revenue</span>
+                  <span>Users</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <span>Month 1</span>
+                  <span>50K ZMW</span>
+                  <span>20</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <span>Month 3</span>
+                  <span>150K ZMW</span>
+                  <span>50</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <span>Month 6</span>
+                  <span>326K ZMW</span>
+                  <span>100</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <span>Month 12</span>
+                  <span>500K ZMW</span>
+                  <span>200</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <span>Month 18</span>
+                  <span>750K ZMW</span>
+                  <span>400</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-sm font-semibold">
+                  <span>Month 24</span>
+                  <span>1.2M ZMW</span>
+                  <span>700</span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 p-4 bg-gradient-to-r from-orange-100 to-blue-100 rounded-lg">
               <p className="text-center font-semibold">Scale Plan: 700 SMEs at launch → 10,000 in two years</p>
             </div>
           </div>
@@ -310,26 +337,40 @@ export default function InvestorPitch() {
         <div className="grid md:grid-cols-2 gap-8">
           <div>
             <h3 className="text-lg font-semibold mb-4">Revenue Breakdown (Monthly)</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={revenueData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  dataKey="value"
-                  label={({ name, value }) => `${name}: ${(value / 1000).toFixed(0)}K ZMW`}
-                >
-                  {revenueData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => `${value.toLocaleString()} ZMW`} />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="bg-white p-6 rounded-lg border">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
+                    <span>Subscriptions</span>
+                  </div>
+                  <span className="font-semibold">137,475 ZMW</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                    <span>Transaction Fees</span>
+                  </div>
+                  <span className="font-semibold">114,915 ZMW</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                    <span>Commissions</span>
+                  </div>
+                  <span className="font-semibold">73,680 ZMW</span>
+                </div>
+                <div className="border-t pt-4">
+                  <div className="flex justify-between font-bold text-lg">
+                    <span>Total Monthly Revenue:</span>
+                    <span>326,070 ZMW</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div className="space-y-6">
-            <Card className="border-green-500/20 bg-gradient-to-br from-green-50 to-emerald-50">
+            <Card className="border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-4 text-green-700">Revenue Streams</h3>
                 <div className="space-y-2 text-sm">
@@ -352,7 +393,7 @@ export default function InvestorPitch() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-red-500/20 bg-gradient-to-br from-red-50 to-pink-50">
+            <Card className="border-red-200 bg-gradient-to-br from-red-50 to-pink-50">
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-4 text-red-700">Financial Projections</h3>
                 <div className="space-y-2 text-sm">
@@ -386,9 +427,9 @@ export default function InvestorPitch() {
       content: (
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-6">
-            <Card className="border-brand-orange/20 bg-gradient-to-br from-brand-orange/10 to-brand-orange/5">
+            <Card className="border-orange-200 bg-gradient-to-br from-orange-100 to-orange-50">
               <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4 text-brand-orange">Investment Details</h3>
+                <h3 className="text-xl font-semibold mb-4 text-orange-600">Investment Details</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span>Seeking:</span>
@@ -409,9 +450,9 @@ export default function InvestorPitch() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-brand-blue/20 bg-gradient-to-br from-brand-blue/10 to-brand-blue/5">
+            <Card className="border-blue-200 bg-gradient-to-br from-blue-100 to-blue-50">
               <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4 text-brand-blue">Investment Split</h3>
+                <h3 className="text-xl font-semibold mb-4 text-blue-600">Investment Split</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span>Lead Investor:</span>
@@ -426,16 +467,16 @@ export default function InvestorPitch() {
             </Card>
           </div>
           <div className="space-y-6">
-            <Card className="border-green-500/20 bg-gradient-to-br from-green-50 to-emerald-50">
+            <Card className="border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
               <CardContent className="p-6">
                 <h3 className="text-xl font-semibold mb-4 text-green-700">Use of Funds</h3>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-brand-orange rounded-full"></div>
+                    <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
                     <span>Platform Development</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-brand-blue rounded-full"></div>
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                     <span>Pilot Program Expansion</span>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -450,7 +491,7 @@ export default function InvestorPitch() {
                 <p className="text-sm text-gray-600 mt-4">18-month runway to break-even</p>
               </CardContent>
             </Card>
-            <Card className="border-purple-500/20 bg-gradient-to-br from-purple-50 to-indigo-50">
+            <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
               <CardContent className="p-6">
                 <h3 className="text-xl font-semibold mb-4 text-purple-700">Exit Strategy</h3>
                 <div className="space-y-2">
@@ -477,25 +518,25 @@ export default function InvestorPitch() {
       content: (
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-6">
-            <Card className="border-brand-orange/20 bg-gradient-to-br from-brand-orange/10 to-brand-orange/5">
+            <Card className="border-orange-200 bg-gradient-to-br from-orange-100 to-orange-50">
               <CardContent className="p-6">
-                <Target className="w-12 h-12 text-brand-orange mb-4" />
+                <Target className="w-12 h-12 text-orange-600 mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Market Opportunity</h3>
                 <p className="text-gray-600">
                   Addresses SME digital gap in fast-growing $405M market with proven demand
                 </p>
               </CardContent>
             </Card>
-            <Card className="border-brand-blue/20 bg-gradient-to-br from-brand-blue/10 to-brand-blue/5">
+            <Card className="border-blue-200 bg-gradient-to-br from-blue-100 to-blue-50">
               <CardContent className="p-6">
-                <Zap className="w-12 h-12 text-brand-blue mb-4" />
+                <Zap className="w-12 h-12 text-blue-600 mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Scalable Technology</h3>
                 <p className="text-gray-600">AI-powered platform with proven pilot traction and strong user feedback</p>
               </CardContent>
             </Card>
           </div>
           <div className="space-y-6">
-            <Card className="border-green-500/20 bg-gradient-to-br from-green-50 to-emerald-50">
+            <Card className="border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
               <CardContent className="p-6">
                 <Globe className="w-12 h-12 text-green-600 mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Regional Alignment</h3>
@@ -504,7 +545,7 @@ export default function InvestorPitch() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="border-purple-500/20 bg-gradient-to-br from-purple-50 to-indigo-50">
+            <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
               <CardContent className="p-6">
                 <Users className="w-12 h-12 text-purple-600 mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Social Impact</h3>
@@ -524,37 +565,37 @@ export default function InvestorPitch() {
       content: (
         <div className="text-center space-y-8">
           <div className="grid md:grid-cols-2 gap-8">
-            <Card className="border-brand-orange/20 bg-gradient-to-br from-brand-orange/10 to-brand-orange/5">
+            <Card className="border-orange-200 bg-gradient-to-br from-orange-100 to-orange-50">
               <CardContent className="p-8">
-                <div className="w-16 h-16 bg-brand-orange/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-brand-orange">1</span>
+                <div className="w-16 h-16 bg-orange-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-orange-600">1</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-2">Review Documentation</h3>
                 <p className="text-gray-600">Term sheet and valuation details available for due diligence</p>
               </CardContent>
             </Card>
-            <Card className="border-brand-blue/20 bg-gradient-to-br from-brand-blue/10 to-brand-blue/5">
+            <Card className="border-blue-200 bg-gradient-to-br from-blue-100 to-blue-50">
               <CardContent className="p-8">
-                <div className="w-16 h-16 bg-brand-blue/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-brand-blue">2</span>
+                <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-blue-600">2</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-2">Strategic Partnership</h3>
                 <p className="text-gray-600">Engage with lead investors for strategic alignment and market entry</p>
               </CardContent>
             </Card>
           </div>
-          <div className="bg-gradient-to-r from-brand-orange/10 via-brand-blue/10 to-green-500/10 p-8 rounded-2xl border border-brand-orange/20">
+          <div className="bg-gradient-to-r from-orange-100 via-blue-100 to-green-100 p-8 rounded-2xl border border-orange-200">
             <h3 className="text-2xl font-bold mb-4">Ready to Join Our Journey?</h3>
             <p className="text-lg text-gray-600 mb-6">
               Contact us for detailed due diligence materials and pilot program access
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
               <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-brand-orange rounded-full"></div>
+                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
                 <span className="font-semibold">support@linka.zm</span>
               </div>
               <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-brand-blue rounded-full"></div>
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                 <span className="font-semibold">WhatsApp Pilot Access</span>
               </div>
             </div>
@@ -578,7 +619,7 @@ export default function InvestorPitch() {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-brand-orange to-brand-blue bg-clip-text text-transparent mb-4">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent mb-4">
               Investor Pitch
             </h2>
             <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
@@ -591,7 +632,7 @@ export default function InvestorPitch() {
                     key={index}
                     onClick={() => setCurrentSlide(index)}
                     className={`w-2 h-2 rounded-full transition-colors ${
-                      index === currentSlide ? "bg-brand-orange" : "bg-gray-300"
+                      index === currentSlide ? "bg-orange-500" : "bg-gray-300"
                     }`}
                   />
                 ))}
